@@ -1,0 +1,12 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Baza smaków{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Baza smaków</h1>
+    <a href="{% url 'admin_flavor_create' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">+ Nowy</a>
+</div>
+
+<div id="flavor-list">
+    {% include "admin/partials/flavor_list.html" %}
+</div>
+{% endblock %}
