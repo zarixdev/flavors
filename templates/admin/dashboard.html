@@ -1,0 +1,19 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+
+<div class="grid grid-cols-2 gap-4 mb-6">
+    <div class="bg-white p-4 rounded-lg shadow">
+        <p class="text-sm text-gray-600">Aktywne smaki</p>
+        <p class="text-2xl font-bold">{{ flavor_count }}</p>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow">
+        <p class="text-sm text-gray-600">Dzisiejsza selekcja</p>
+        <p class="text-2xl font-bold">{{ today_selection.flavors.count|default:"0" }}</p>
+    </div>
+</div>
+
+<a href="{% url 'admin_flavor_create' %}" class="block w-full bg-blue-600 text-white text-center font-medium py-3 rounded-lg mb-4">+ Dodaj nowy smak</a>
+<a href="{% url 'admin_daily_selection' %}" class="block w-full bg-green-600 text-white text-center font-medium py-3 rounded-lg">Zarządzaj dzisiejszymi smakami</a>
+{% endblock %}
