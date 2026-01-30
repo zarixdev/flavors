@@ -1,11 +1,12 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.utils import timezone
 
 from .models import Flavor, DailySelection
+from .forms import FlavorForm
 
 
 def admin_login(request):
@@ -46,3 +47,73 @@ def admin_dashboard(request):
         return render(request, 'admin/partials/dashboard_content.html', context)
 
     return render(request, 'admin/dashboard.html', context)
+
+
+@login_required
+@require_http_methods(["GET"])
+def flavor_list(request):
+    """List all flavors with filter by status."""
+    status_filter = request.GET.get('status', 'active')
+    search = request.GET.get('search', '')
+
+    flavors = Flavor.objects.all()
+    if status_filter != 'all':
+        flavors = flavors.filter(status=status_filter)
+    if search:
+        flavors = flavors.filter(name__icontains=search)
+
+    flavors = flavors.order_by('-created_at')
+
+    if request.htmx:
+        return render(request, 'admin/partials/flavor_list.html', {'flavors': flavors})
+
+    return render(request, 'admin/flavor_list.html', {
+        'flavors': flavors,
+        'status_filter': status_filter,
+    })
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def flavor_create(request):
+    """Create new flavor with HTMX support."""
+    if request.method == 'POST':
+        form = FlavorForm(request.POST, request.FILES)
+        if form.is_valid():
+            flavor = form.save()
+            messages.success(request, f'Smak "{flavor.name}" dodany.')
+            if request.htmx:
+                flavors = Flavor.objects.filter(status='active')
+                return render(request, 'admin/partials/flavor_list.html', {'flavors': flavors})
+            return redirect('admin_flavor_list')
+
+        if request.htmx:
+            return render(request, 'admin/partials/flavor_form.html', {
+                'form': form, 'submit_url': request.path, 'title': 'Dodaj smak'
+            }, status=422)
+    else:
+        form = FlavorForm()
+
+    return render(request, 'admin/flavor_form.html', {
+        'form': form, 'title': 'Dodaj nowy smak', 'submit_url': request.path
+    })
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def flavor_edit(request, pk):
+    """Edit existing flavor."""
+    flavor = get_object_or_404(Flavor, pk=pk)
+
+    if request.method == 'POST':
+        form = FlavorForm(request.POST, request.FILES, instance=flavor)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Smak "{flavor.name}" zaktualizowany.')
+            return redirect('admin_flavor_list')
+    else:
+        form = FlavorForm(instance=flavor)
+
+    return render(request, 'admin/flavor_form.html', {
+        'form': form, 'flavor': flavor, 'title': f'Edytuj: {flavor.name}', 'submit_url': request.path
+    })
