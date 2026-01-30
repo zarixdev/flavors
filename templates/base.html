@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{% csrf_token %}">
+    <title>{% block title %}Dzisiejsze Smaki Lodów{% endblock %}</title>
+    {% load tailwind_cli %}
+    {% tailwind_css %}
+    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshCXF+6l/BDtC1BP6+4Kj8YUh5U9vRzC8tA9l8n9l8l8y8y8y8y8y8" crossorigin="anonymous"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="bg-gray-50 min-h-screen">
+    {% block content %}{% endblock %}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
