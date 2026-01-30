@@ -1,0 +1,19 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Logowanie{% endblock %}
+{% block content %}
+<div class="max-w-sm mx-auto mt-10">
+    <h1 class="text-2xl font-bold text-center mb-8">Panel Smaki Lodów</h1>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Użytkownik</label>
+            <input type="text" name="username" class="w-full px-4 py-3 rounded-lg border border-gray-300" required>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Hasło</label>
+            <input type="password" name="password" class="w-full px-4 py-3 rounded-lg border border-gray-300" required>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white font-medium py-3 rounded-lg">Zaloguj</button>
+    </form>
+</div>
+{% endblock %}
