@@ -1,0 +1,13 @@
+<div class="space-y-3">
+    {% for flavor in flavors %}
+    <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
+        <div>
+            <h3 class="font-medium">{{ flavor.name }}</h3>
+            <p class="text-sm text-gray-500">{{ flavor.get_flavor_type_display }}</p>
+        </div>
+        <a href="{% url 'admin_flavor_edit' flavor.pk %}" class="text-blue-600 text-sm">Edytuj</a>
+    </div>
+    {% empty %}
+    <p class="text-gray-500 text-center py-8">Brak smaków w bazie.</p>
+    {% endfor %}
+</div>
