@@ -1,2 +1,29 @@
 .planning/
 data/db.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+
+# Django
+static/css/tailwind.css
+media/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tailwind CLI
+.django_tailwind_cli/
