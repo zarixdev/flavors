@@ -1,0 +1,71 @@
+<input type="hidden" name="tags" id="tags-input" value='{{ selected_tags|safe }}'>
+
+<div class="flex flex-wrap gap-2 mb-3">
+    <button type="button" data-tag="vegan" onclick="toggleTag('vegan')"
+            class="tag-btn px-3 py-1.5 rounded-full text-sm font-medium bg-green-100 text-green-800 border-2 border-transparent hover:border-green-500">
+        Wegański
+    </button>
+    <button type="button" data-tag="lactose-free" onclick="toggleTag('lactose-free')"
+            class="tag-btn px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border-2 border-transparent hover:border-blue-500">
+        Bez laktozy
+    </button>
+    <button type="button" data-tag="new" onclick="toggleTag('new')"
+            class="tag-btn px-3 py-1.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800 border-2 border-transparent hover:border-purple-500">
+        Nowość
+    </button>
+    <button type="button" data-tag="hit" onclick="toggleTag('hit')"
+            class="tag-btn px-3 py-1.5 rounded-full text-sm font-medium bg-red-100 text-red-800 border-2 border-transparent hover:border-red-500">
+        Hit dnia
+    </button>
+    <button type="button" data-tag="sugar-free" onclick="toggleTag('sugar-free')"
+            class="tag-btn px-3 py-1.5 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800 border-2 border-transparent hover:border-yellow-500">
+        Bez cukru
+    </button>
+    <button type="button" data-tag="seasonal" onclick="toggleTag('seasonal')"
+            class="tag-btn px-3 py-1.5 rounded-full text-sm font-medium bg-orange-100 text-orange-800 border-2 border-transparent hover:border-orange-500">
+        Sezonowy
+    </button>
+</div>
+
+<div class="flex gap-2 mb-3">
+    <input type="text" id="custom-tag" placeholder="Własny tag..." maxlength="20"
+           class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm">
+    <button type="button" onclick="addCustomTag()" class="px-4 py-2 bg-gray-100 rounded-lg text-sm">Dodaj</button>
+</div>
+
+<p class="text-sm text-gray-500">Wybrano <span id="tag-count">0</span>/5 tagów</p>
+
+<script>
+function updateTagDisplay() {
+    const input = document.getElementById('tags-input');
+    const tags = JSON.parse(input.value || '[]');
+    document.getElementById('tag-count').textContent = tags.length;
+    document.querySelectorAll('.tag-btn').forEach(btn => {
+        const selected = tags.includes(btn.dataset.tag);
+        btn.classList.toggle('border-gray-400', !selected);
+        btn.classList.toggle('border-transparent', selected);
+    });
+}
+function toggleTag(tag) {
+    const input = document.getElementById('tags-input');
+    let tags = JSON.parse(input.value || '[]');
+    if (tags.includes(tag)) tags = tags.filter(t => t !== tag);
+    else if (tags.length < 5) tags.push(tag);
+    input.value = JSON.stringify(tags);
+    updateTagDisplay();
+}
+function addCustomTag() {
+    const input = document.getElementById('custom-tag');
+    const tag = input.value.trim().toLowerCase();
+    if (!tag) return;
+    const tagsInput = document.getElementById('tags-input');
+    let tags = JSON.parse(tagsInput.value || '[]');
+    if (!tags.includes(tag) && tags.length < 5) {
+        tags.push(tag);
+        tagsInput.value = JSON.stringify(tags);
+        input.value = '';
+        updateTagDisplay();
+    }
+}
+updateTagDisplay();
+</script>
