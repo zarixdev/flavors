@@ -15,5 +15,6 @@
 </div>
 
 <a href="{% url 'admin_flavor_create' %}" class="block w-full bg-blue-600 text-white text-center font-medium py-3 rounded-lg mb-4">+ Dodaj nowy smak</a>
-<a href="{% url 'admin_daily_selection' %}" class="block w-full bg-green-600 text-white text-center font-medium py-3 rounded-lg">Zarządzaj dzisiejszymi smakami</a>
+<!-- Disabled until Phase 4: admin_daily_selection view not yet implemented -->
+<button disabled class="block w-full bg-gray-400 text-white text-center font-medium py-3 rounded-lg cursor-not-allowed">Zarządzaj dzisiejszymi smakami (wkrótce)</button>
 {% endblock %}
