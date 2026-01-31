@@ -15,7 +15,8 @@
             <div class="flex items-center justify-between">
                 <a href="{% url 'admin_dashboard' %}" class="font-bold text-lg">Smaki Lodów</a>
                 <div class="flex gap-4">
-                    <a href="{% url 'admin_daily_selection' %}" class="text-sm text-blue-600">Dziś</a>
+                    <!-- Disabled until Phase 4: admin_daily_selection view not yet implemented -->
+                    <a href="#" class="text-sm text-gray-400 cursor-not-allowed" aria-disabled="true">Dziś</a>
                     <a href="{% url 'admin_flavor_list' %}" class="text-sm text-gray-600">Baza</a>
                     <a href="{% url 'admin_logout' %}" class="text-sm text-red-600">Wyloguj</a>
                 </div>
