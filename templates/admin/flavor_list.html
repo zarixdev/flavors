@@ -6,6 +6,15 @@
     <a href="{% url 'admin_flavor_create' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">+ Nowy</a>
 </div>
 
+<!-- Navigation tabs -->
+<div class="flex gap-4 mb-4 text-sm">
+    <span class="font-bold text-blue-600">Aktywne</span>
+    <a href="{% url 'admin_archived_flavors' %}"
+       class="text-gray-600 hover:text-gray-900">
+        Archiwum
+    </a>
+</div>
+
 <div id="flavor-list">
     {% include "admin/partials/flavor_list.html" %}
 </div>

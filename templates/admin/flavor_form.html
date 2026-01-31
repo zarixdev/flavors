@@ -112,7 +112,18 @@
         </button>
     </form>
 
-    <!-- Archive button placeholder: Will be added by Plan 02-05 -->
+    {% if flavor %}
+    <!-- Archive button (edit mode only) -->
+    <div class="mt-8 pt-6 border-t border-gray-200">
+        <a href="{% url 'admin_flavor_archive' flavor.pk %}"
+           onclick="return confirm('Zarchiwizowac smak {{ flavor.name }}?')"
+           class="block w-full text-center py-3 min-h-[44px] rounded-lg
+                  border border-red-300 text-red-600 font-medium
+                  hover:bg-red-50 active:bg-red-100">
+            Archiwizuj
+        </a>
+    </div>
+    {% endif %}
 </div>
 
 <script src="{% static 'admin/js/image_preview.js' %}"></script>
