@@ -30,12 +30,15 @@
                     <p class="text-sm text-gray-500">{{ flavor.get_flavor_type_display }}</p>
                 </div>
             </div>
-            <a href="{% url 'admin_flavor_restore' flavor.pk %}"
-               class="px-4 py-2 min-h-[44px] flex items-center
-                      bg-green-600 text-white rounded-lg font-medium
-                      hover:bg-green-700 active:bg-green-800">
-                Przywroc
-            </a>
+            <form method="post" action="{% url 'admin_flavor_restore' flavor.pk %}">
+                {% csrf_token %}
+                <button type="submit"
+                        class="px-4 py-2 min-h-[44px] flex items-center
+                               bg-green-600 text-white rounded-lg font-medium
+                               hover:bg-green-700 active:bg-green-800">
+                    Przywroc
+                </button>
+            </form>
         </div>
         {% endfor %}
     </div>

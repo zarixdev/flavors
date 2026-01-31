@@ -1,12 +1,16 @@
-from django.db import models
-from django.utils.text import slugify
-from django.core.exceptions import ValidationError
-from PIL import Image
-from io import BytesIO
-from django.core.files.base import ContentFile
+import logging
 import uuid
 import os
 from datetime import datetime
+from io import BytesIO
+
+from django.db import models
+from django.utils.text import slugify
+from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+from PIL import Image
+
+logger = logging.getLogger(__name__)
 
 PREDEFINED_TAGS = {
     'vegan': {'label': 'Wegański', 'color': 'green'},
@@ -69,11 +73,11 @@ class Flavor(models.Model):
 
                 # Replace file content with optimized version
                 file_content = ContentFile(buffer.getvalue())
-                filename = f'{uuid.uuid4().hex}.webp'
-                self.photo.save(filename, file_content, save=False)
-            except Exception:
-                # If image processing fails, continue with original
-                pass
+                # uuid_upload_to generates the actual filename with UUID
+                self.photo.save('temp.webp', file_content, save=False)
+            except Exception as e:
+                # If image processing fails, log and continue with original
+                logger.warning(f"Image processing failed for {self.name}: {e}")
 
         super().save(*args, **kwargs)
 
