@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import Flavor, DailySelection
 
 
@@ -8,6 +9,15 @@ class FlavorAdmin(admin.ModelAdmin):
     list_filter = ['status', 'flavor_type', 'is_seasonal']
     search_fields = ['name', 'description']
     prepopulated_fields = {'slug': ('name',)}
+
+    def photo_thumbnail(self, obj):
+        if obj.photo:
+            return format_html(
+                '<a href="{}" target="_blank"><img src="{}" style="max-height: 50px; max-width: 100px;" /></a>',
+                obj.photo.url, obj.photo.url
+            )
+        return "Brak zdjęcia"
+    photo_thumbnail.short_description = "Zdjęcie"
 
 
 @admin.register(DailySelection)
