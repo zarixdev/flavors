@@ -117,3 +117,50 @@ def flavor_edit(request, pk):
     return render(request, 'admin/flavor_form.html', {
         'form': form, 'flavor': flavor, 'title': f'Edytuj: {flavor.name}', 'submit_url': request.path
     })
+
+
+@login_required
+@require_http_methods(["GET"])
+def flavor_detail(request, pk):
+    """View flavor details (read-only)."""
+    flavor = get_object_or_404(Flavor, pk=pk)
+    return render(request, 'admin/flavor_detail.html', {'flavor': flavor})
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def archive_flavor(request, pk):
+    """Archive a flavor (soft delete)."""
+    flavor = get_object_or_404(Flavor, pk=pk)
+
+    if request.method == 'POST' or request.GET.get('confirm'):
+        flavor.status = 'archived'
+        flavor.save()
+        messages.success(request, f'Smak "{flavor.name}" zarchiwizowany.')
+        return redirect('admin_flavor_list')
+
+    # GET without confirm - show confirmation or rely on JS confirm
+    # Since form uses JS confirm, we can process directly
+    flavor.status = 'archived'
+    flavor.save()
+    messages.success(request, f'Smak "{flavor.name}" zarchiwizowany.')
+    return redirect('admin_flavor_list')
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def restore_flavor(request, pk):
+    """Restore an archived flavor to active status."""
+    flavor = get_object_or_404(Flavor, pk=pk, status='archived')
+    flavor.status = 'active'
+    flavor.save()
+    messages.success(request, f'Smak "{flavor.name}" przywrócony.')
+    return redirect('admin_archived_flavors')
+
+
+@login_required
+@require_http_methods(["GET"])
+def archived_flavors(request):
+    """List all archived flavors with restore option."""
+    flavors = Flavor.objects.filter(status='archived').order_by('name')
+    return render(request, 'admin/archived_flavors.html', {'flavors': flavors})
