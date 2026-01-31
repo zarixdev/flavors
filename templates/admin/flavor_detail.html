@@ -1,0 +1,107 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ flavor.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto">
+    <!-- Header with back button -->
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{% url 'admin_flavor_list' %}"
+           class="text-gray-500 hover:text-gray-700 min-w-[44px] min-h-[44px] flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </a>
+        <h1 class="text-2xl font-bold">{{ flavor.name }}</h1>
+    </div>
+
+    <!-- Photo -->
+    {% if flavor.photo %}
+    <div class="mb-6">
+        <img src="{{ flavor.photo.url }}" alt="{{ flavor.name }}"
+             class="w-full rounded-lg object-cover max-h-[300px]">
+    </div>
+    {% else %}
+    <div class="mb-6 bg-gray-100 rounded-lg h-48 flex items-center justify-center">
+        <span class="text-gray-400">Brak zdjecia</span>
+    </div>
+    {% endif %}
+
+    <!-- Details -->
+    <div class="space-y-4 mb-8">
+        <!-- Type badge -->
+        <div>
+            <span class="text-sm text-gray-500">Typ</span>
+            <p class="mt-1">
+                <span class="inline-block px-3 py-1 rounded-full text-sm font-medium
+                    {% if flavor.flavor_type == 'milk' %}
+                    bg-blue-100 text-blue-800
+                    {% else %}
+                    bg-green-100 text-green-800
+                    {% endif %}">
+                    {{ flavor.get_flavor_type_display }}
+                </span>
+            </p>
+        </div>
+
+        <!-- Tags -->
+        {% if flavor.tags %}
+        <div>
+            <span class="text-sm text-gray-500">Tagi</span>
+            <div class="mt-1 flex flex-wrap gap-2">
+                {% for tag in flavor.tags %}
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                    {{ tag }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Description -->
+        {% if flavor.description %}
+        <div>
+            <span class="text-sm text-gray-500">Opis</span>
+            <p class="mt-1 text-gray-900">{{ flavor.description }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Seasonal badge -->
+        {% if flavor.is_seasonal %}
+        <div>
+            <span class="inline-block px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
+                Sezonowy
+            </span>
+        </div>
+        {% endif %}
+
+        <!-- Status -->
+        <div>
+            <span class="text-sm text-gray-500">Status</span>
+            <p class="mt-1">
+                <span class="inline-block px-3 py-1 rounded-full text-sm font-medium
+                    {% if flavor.status == 'active' %}
+                    bg-green-100 text-green-800
+                    {% else %}
+                    bg-gray-100 text-gray-800
+                    {% endif %}">
+                    {{ flavor.get_status_display }}
+                </span>
+            </p>
+        </div>
+
+        <!-- Created date -->
+        <div>
+            <span class="text-sm text-gray-500">Dodano</span>
+            <p class="mt-1 text-gray-900">{{ flavor.created_at|date:"d.m.Y H:i" }}</p>
+        </div>
+    </div>
+
+    <!-- Edit button -->
+    <a href="{% url 'admin_flavor_edit' flavor.pk %}"
+       class="block w-full text-center bg-blue-600 text-white font-medium
+              py-3 min-h-[44px] rounded-lg hover:bg-blue-700">
+        Edytuj
+    </a>
+</div>
+{% endblock %}
