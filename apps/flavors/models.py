@@ -54,30 +54,46 @@ class Flavor(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
 
-        # Process image if new photo uploaded
+        # Process image only if it's new or changed
         if self.photo and hasattr(self.photo, 'file'):
-            try:
-                img = Image.open(self.photo)
+            # Check if photo is new or changed
+            is_new_photo = False
+            if self.pk is None:
+                # New object - always process
+                is_new_photo = True
+            else:
+                # Existing object - check if photo changed
+                try:
+                    existing = self.__class__.objects.filter(pk=self.pk).first()
+                    if existing is None or existing.photo.name != self.photo.name:
+                        is_new_photo = True
+                except Exception:
+                    # If check fails, assume it's new/changed to be safe
+                    is_new_photo = True
 
-                # Convert RGBA/P to RGB for WebP compatibility
-                if img.mode in ('RGBA', 'P'):
-                    img = img.convert('RGB')
+            if is_new_photo:
+                try:
+                    img = Image.open(self.photo)
 
-                # Resize to max 1200px maintaining aspect ratio
-                max_size = (1200, 1200)
-                img.thumbnail(max_size, Image.BICUBIC)
+                    # Convert RGBA/P to RGB for WebP compatibility
+                    if img.mode in ('RGBA', 'P'):
+                        img = img.convert('RGB')
 
-                # Save as WebP with 85% quality
-                buffer = BytesIO()
-                img.save(buffer, format='WEBP', quality=85)
+                    # Resize to max 1200px maintaining aspect ratio
+                    max_size = (1200, 1200)
+                    img.thumbnail(max_size, Image.BICUBIC)
 
-                # Replace file content with optimized version
-                file_content = ContentFile(buffer.getvalue())
-                # uuid_upload_to generates the actual filename with UUID
-                self.photo.save('temp.webp', file_content, save=False)
-            except Exception as e:
-                # If image processing fails, log and continue with original
-                logger.warning(f"Image processing failed for {self.name}: {e}")
+                    # Save as WebP with 85% quality
+                    buffer = BytesIO()
+                    img.save(buffer, format='WEBP', quality=85)
+
+                    # Replace file content with optimized version
+                    file_content = ContentFile(buffer.getvalue())
+                    # uuid_upload_to generates the actual filename with UUID
+                    self.photo.save('temp.webp', file_content, save=False)
+                except Exception as e:
+                    # If image processing fails, log and continue with original
+                    logger.warning(f"Image processing failed for {self.name}: {e}")
 
         super().save(*args, **kwargs)
 
