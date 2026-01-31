@@ -5,7 +5,7 @@ from .models import Flavor, DailySelection
 
 @admin.register(Flavor)
 class FlavorAdmin(admin.ModelAdmin):
-    list_display = ['name', 'flavor_type', 'is_seasonal', 'status', 'created_at']
+    list_display = ['photo_thumbnail', 'name', 'flavor_type', 'is_seasonal', 'status', 'created_at']
     list_filter = ['status', 'flavor_type', 'is_seasonal']
     search_fields = ['name', 'description']
     prepopulated_fields = {'slug': ('name',)}
