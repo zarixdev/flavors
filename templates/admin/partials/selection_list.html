@@ -1,0 +1,56 @@
+<!-- templates/admin/partials/selection_list.html -->
+{% include "admin/partials/toast.html" %}
+
+<!-- Quick Actions Bar - Contextual based on state -->
+<div class="flex gap-2 mb-4">
+    {% if not selection.flavors.exists %}
+        <!-- Empty state: Show copy from yesterday -->
+        <button
+            hx-post="{% url 'flavors:admin_copy_yesterday' %}"
+            hx-target="#selection-container"
+            hx-swap="innerHTML"
+            class="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg font-medium min-h-[48px] hover:bg-blue-700 transition-colors"
+        >
+            Kopiuj z wczoraj
+        </button>
+    {% else %}
+        <!-- Has flavors: Show sort button (URL created in Task 5) and clear -->
+        <button
+            hx-get="{% url 'flavors:admin_daily_selection_sort' %}"
+            hx-target="#selection-container"
+            class="flex-1 bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg font-medium min-h-[48px] hover:bg-gray-50 transition-colors"
+        >
+            Sortuj
+        </button>
+        <button
+            hx-post="{% url 'flavors:admin_clear_selection' %}"
+            hx-target="#selection-container"
+            hx-confirm="Wyczyścić wszystkie smaki?"
+            class="px-4 py-3 text-red-600 border border-red-200 rounded-lg font-medium min-h-[48px] hover:bg-red-50 transition-colors"
+        >
+            Wyczyść
+        </button>
+    {% endif %}
+</div>
+
+<!-- Selection Info -->
+<div class="text-sm text-gray-500 mb-4">
+    Wybrano: {{ selection.flavors.count }} z {{ all_flavors|length }} smaków
+    {% if selection.hit_of_the_day %}
+        | Hit: {{ selection.hit_of_the_day.name }}
+    {% endif %}
+</div>
+
+<!-- Flavor List -->
+<div class="border rounded-lg overflow-hidden">
+    {% for item in flavors %}
+        {% with flavor=item.flavor is_selected=item.is_selected %}
+        {% include "admin/partials/flavor_select_row.html" %}
+        {% endwith %}
+    {% empty %}
+        <div class="p-8 text-center text-gray-500">
+            Brak aktywnych smaków w bazie.
+            <a href="{% url 'flavors:admin_flavor_create' %}" class="text-blue-600 hover:underline">Dodaj pierwszy smak</a>
+        </div>
+    {% endfor %}
+</div>
