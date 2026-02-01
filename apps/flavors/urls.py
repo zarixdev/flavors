@@ -3,7 +3,7 @@ from . import views, views_admin
 
 urlpatterns = [
     # Public views
-    path('', views.index, name='index'),
+    path('', views.homepage, name='homepage'),
 
     # Admin views
     path('admin/login/', views_admin.admin_login, name='admin_login'),
