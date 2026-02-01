@@ -1,0 +1,21 @@
+<!-- templates/admin/partials/error_toast.html -->
+<!-- Error toast partial for HTMX responses - swapped OOB to toast-container -->
+{% if messages %}
+<div id="toast" hx-swap-oob="true" class="fixed top-4 left-4 right-4 z-50 pointer-events-none">
+    {% for message in messages %}
+    <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-800{% elif message.tags == 'warning' %}bg-yellow-100 border-yellow-400 text-yellow-800{% else %}bg-red-100 border-red-400 text-red-800{% endif %} border px-4 py-3 rounded shadow-lg mb-2 animate-fade-out">
+        <div class="flex items-start gap-2">
+            <span class="text-lg shrink-0">
+                {% if message.tags == 'error' %}&#x26A0;{% else %}&#x26A0;{% endif %}
+            </span>
+            <div class="flex-1">
+                <p class="font-medium">{{ message }}</p>
+                {% if message.tags == 'error' %}
+                <p class="text-sm opacity-75 mt-1">Spróbuj ponownie lub odśwież stronę.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
