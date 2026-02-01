@@ -7,6 +7,8 @@
     <button
         hx-get="{% url 'flavors:admin_daily_selection' %}"
         hx-target="#selection-container"
+        hx-indicator="this"
+        hx-disabled-elt="this"
         class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium min-h-[44px] hover:bg-blue-700 transition-colors"
     >
         Gotowe
@@ -39,6 +41,8 @@
                 hx-target="#selection-container"
                 hx-swap="innerHTML"
                 hx-sync="this:replace"
+                hx-indicator="this"
+                hx-disabled-elt="this"
                 class="w-11 h-11 flex items-center justify-center bg-gray-100 rounded-lg {% if forloop.first %}opacity-30 cursor-not-allowed{% else %}hover:bg-gray-200{% endif %} transition-colors"
                 {% if forloop.first %}disabled aria-disabled="true"{% endif %}
                 aria-label="Przesuń w górę"
@@ -54,6 +58,8 @@
                 hx-target="#selection-container"
                 hx-swap="innerHTML"
                 hx-sync="this:replace"
+                hx-indicator="this"
+                hx-disabled-elt="this"
                 class="w-11 h-11 flex items-center justify-center bg-gray-100 rounded-lg {% if forloop.last %}opacity-30 cursor-not-allowed{% else %}hover:bg-gray-200{% endif %} transition-colors"
                 {% if forloop.last %}disabled aria-disabled="true"{% endif %}
                 aria-label="Przesuń w dół"
@@ -70,6 +76,8 @@
         <button
             hx-get="{% url 'flavors:admin_daily_selection' %}"
             hx-target="#selection-container"
+            hx-indicator="this"
+            hx-disabled-elt="this"
             class="block mx-auto mt-2 text-blue-600 hover:underline"
         >
             Wróć do wyboru
@@ -83,6 +91,8 @@
     <button
         hx-get="{% url 'flavors:admin_daily_selection' %}"
         hx-target="#selection-container"
+        hx-indicator="this"
+        hx-disabled-elt="this"
         class="text-gray-500 hover:text-gray-700 underline"
     >
         Anuluj sortowanie

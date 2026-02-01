@@ -9,6 +9,8 @@
             hx-post="{% url 'flavors:admin_copy_yesterday' %}"
             hx-target="#selection-container"
             hx-swap="innerHTML"
+            hx-indicator="this"
+            hx-disabled-elt="this"
             class="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg font-medium min-h-[48px] hover:bg-blue-700 transition-colors"
         >
             Kopiuj z wczoraj
@@ -18,6 +20,8 @@
         <button
             hx-get="{% url 'flavors:admin_daily_selection_sort' %}"
             hx-target="#selection-container"
+            hx-indicator="this"
+            hx-disabled-elt="this"
             class="flex-1 bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg font-medium min-h-[48px] hover:bg-gray-50 transition-colors"
         >
             Sortuj
@@ -26,6 +30,8 @@
             hx-post="{% url 'flavors:admin_clear_selection' %}"
             hx-target="#selection-container"
             hx-confirm="Wyczyścić wszystkie smaki?"
+            hx-indicator="this"
+            hx-disabled-elt="this"
             class="px-4 py-3 text-red-600 border border-red-200 rounded-lg font-medium min-h-[48px] hover:bg-red-50 transition-colors"
         >
             Wyczyść
