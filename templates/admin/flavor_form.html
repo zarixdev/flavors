@@ -115,7 +115,7 @@
     {% if flavor %}
     <!-- Archive button (edit mode only) -->
     <div class="mt-8 pt-6 border-t border-gray-200">
-        <form method="post" action="{% url 'admin_flavor_archive' flavor.pk %}"
+        <form method="post" action="{% url 'flavors:admin_flavor_archive' flavor.pk %}"
               onsubmit="return confirm('Zarchiwizowac smak {{ flavor.name }}?')">
             {% csrf_token %}
             <button type="submit"

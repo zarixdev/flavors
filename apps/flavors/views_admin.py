@@ -22,7 +22,7 @@ def admin_login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('admin_dashboard')
+            return redirect('flavors:admin_dashboard')
         else:
             messages.error(request, 'Nieprawidłowy login lub hasło.')
     return render(request, 'admin/login.html')
@@ -31,7 +31,7 @@ def admin_login(request):
 def admin_logout(request):
     """Logout view."""
     logout(request)
-    return redirect('admin_login')
+    return redirect('flavors:admin_login')
 
 
 @login_required
@@ -90,7 +90,7 @@ def flavor_create(request):
             if request.htmx:
                 flavors = Flavor.objects.filter(status='active')
                 return render(request, 'admin/partials/flavor_list.html', {'flavors': flavors})
-            return redirect('admin_flavor_list')
+            return redirect('flavors:admin_flavor_list')
 
         if request.htmx:
             return render(request, 'admin/partials/flavor_form.html', {
@@ -115,7 +115,7 @@ def flavor_edit(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, f'Smak "{flavor.name}" zaktualizowany.')
-            return redirect('admin_flavor_list')
+            return redirect('flavors:admin_flavor_list')
     else:
         form = FlavorForm(instance=flavor)
 
@@ -141,7 +141,7 @@ def archive_flavor(request, pk):
     flavor.status = 'archived'
     flavor.save()
     messages.success(request, f'Smak "{flavor.name}" zarchiwizowany.')
-    return redirect('admin_flavor_list')
+    return redirect('flavors:admin_flavor_list')
 
 
 @login_required
@@ -152,7 +152,7 @@ def restore_flavor(request, pk):
     flavor.status = 'active'
     flavor.save()
     messages.success(request, f'Smak "{flavor.name}" przywrócony.')
-    return redirect('admin_archived_flavors')
+    return redirect('flavors:admin_archived_flavors')
 
 
 @login_required
