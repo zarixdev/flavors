@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Dzisiejsze Smaki Lodów{% endblock %}
+{% block meta_description %}Sprawdź dzisiejsze smaki lodów w naszej lodziarni. Świeże, domowe lody przygotowywane codziennie.{% endblock %}
+{% block og_title %}Dzisiejsze Smaki Lodów{% endblock %}
+{% block og_description %}Sprawdź dzisiejsze smaki lodów w naszej lodziarni.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    {# Nagłówek #}
+    <header class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Dzisiejsze Smaki</h1>
+
+        {# Wskaźnik świeżości #}
+        <div class="mt-2 text-sm">
+            {% if fallback_note %}
+                <span class="text-orange-600 font-medium">{{ fallback_note }}</span>
+                {% if last_updated %}
+                    <span class="text-gray-500"> | Zaktualizowano {{ last_updated|naturaltime }}</span>
+                {% endif %}
+            {% elif last_updated %}
+                <span class="text-gray-500">Zaktualizowano {{ last_updated|naturaltime }}</span>
+            {% endif %}
+        </div>
+    </header>
+
+    {# Siatka smaków #}
+    {% if flavors %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            {% for flavor in flavors %}
+                {% include "flavors/partials/flavor_card.html" %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-12">
+            <p class="text-gray-500 text-lg">Brak dostępnych smaków.</p>
+        </div>
+    {% endif %}
+
+    {# Sekcja lokalizacji #}
+    <section class="border-t border-gray-200 pt-8 mt-12">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Gdzie nas znaleźć</h2>
+        <div class="text-gray-600">
+            <p class="mb-2"><strong>Otwarte:</strong> 12:00 - 20:00 (codziennie)</p>
+            <p>ul. Przykładowa 123, Warszawa</p>
+        </div>
+    </section>
+</div>
+{% endblock %}
