@@ -1,4 +1,8 @@
 /* static/css/custom.css */
+
+/* ============================================
+   Toast Animation
+   ============================================ */
 @keyframes fadeOut {
     0% { opacity: 1; }
     70% { opacity: 1; }
@@ -9,7 +13,90 @@
     animation: fadeOut 3s forwards;
 }
 
+/* ============================================
+   Touch Target Utilities
+   ============================================ */
 .min-touch-target {
     min-width: 44px;
     min-height: 44px;
+}
+
+/* ============================================
+   HTMX Loading Indicators
+   ============================================ */
+
+/* HTMX adds .htmx-request class to indicator during request */
+.htmx-request {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: wait;
+}
+
+/* Explicit indicator element - shown during request */
+.hx-indicator {
+    display: none;
+}
+
+.htmx-request .hx-indicator,
+.htmx-request.hx-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Loading spinner animation */
+@keyframes hx-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.hx-loading-spinner {
+    animation: hx-spin 1s linear infinite;
+}
+
+/* Row-level loading state */
+.flavor-row.htmx-request {
+    background-color: #f3f4f6;
+    transition: opacity 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+/* Button loading state - dimmed and disabled appearance */
+button.htmx-request,
+[role="button"].htmx-request {
+    opacity: 0.6;
+    cursor: wait;
+    transform: scale(0.98);
+    transition: opacity 0.15s ease-in-out, transform 0.1s ease-in-out;
+}
+
+/* Disabled element styling via hx-disabled-elt */
+[disabled],
+[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Container-level loading overlay option */
+.hx-loading-overlay {
+    position: relative;
+}
+
+.hx-loading-overlay.htmx-request::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Pulsing animation for interactive elements during request */
+@keyframes hx-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.4; }
+}
+
+.htmx-request.hx-pulse {
+    animation: hx-pulse 1s ease-in-out infinite;
 }
