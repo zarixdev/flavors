@@ -256,3 +256,182 @@ def toggle_flavor(request, flavor_id):
     }
 
     return render(request, 'admin/partials/flavor_toggle_row.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def set_hit(request, flavor_id):
+    """
+    Set or toggle hit of the day.
+    If flavor is already hit: clear it.
+    If different flavor: set as new hit.
+    """
+    today = timezone.now().date()
+    selection, _ = DailySelection.objects.get_or_create(
+        date=today,
+        defaults={'display_order': []}
+    )
+
+    flavor = get_object_or_404(Flavor, pk=flavor_id, status='active')
+
+    # Verify flavor is in today's selection
+    if not selection.flavors.filter(pk=flavor_id).exists():
+        messages.error(request, 'Wybierz najpierw ten smak, aby ustawić hit dnia.')
+        return _get_selection_partial(request, selection)
+
+    # Toggle hit state
+    if selection.hit_of_the_day_id == flavor_id:
+        selection.hit_of_the_day = None
+        selection.save(update_fields=['hit_of_the_day'])
+        messages.info(request, f'Usunięto hit dnia: {flavor.name}')
+    else:
+        selection.hit_of_the_day = flavor
+        selection.save(update_fields=['hit_of_the_day'])
+        messages.success(request, f'Hit dnia: {flavor.name}')
+
+    return _get_selection_partial(request, selection)
+
+
+@login_required
+@require_http_methods(["POST"])
+def move_flavor(request, flavor_id, direction):
+    """
+    Move flavor up or down in the display order.
+    direction: 'up' (-1) or 'down' (+1)
+    """
+    today = timezone.now().date()
+    selection, _ = DailySelection.objects.get_or_create(
+        date=today,
+        defaults={'display_order': []}
+    )
+
+    # Convert direction string to numeric offset
+    direction_map = {'up': -1, 'down': 1}
+    direction_value = direction_map.get(direction, 0)
+
+    if direction_value == 0:
+        messages.error(request, 'Nieprawidłowy kierunek.')
+        return _get_selection_partial(request, selection)
+
+    # Perform the move
+    success = selection.move_flavor(flavor_id, direction_value)
+
+    if success:
+        flavor = get_object_or_404(Flavor, pk=flavor_id)
+        direction_label = 'wyżej' if direction_value == -1 else 'niżej'
+        messages.success(request, f'Przesunięto {flavor.name} {direction_label}')
+    else:
+        messages.info(request, 'Nie można przesunąć dalej.')
+
+    return _get_selection_partial(request, selection, sort_mode=True)
+
+
+@login_required
+@require_http_methods(["POST"])
+def copy_from_yesterday(request):
+    """
+    Copy yesterday's selection to today.
+    Copies flavors and display_order.
+    """
+    today = timezone.now().date()
+    yesterday = today - timezone.timedelta(days=1)
+
+    selection, _ = DailySelection.objects.get_or_create(
+        date=today,
+        defaults={'display_order': []}
+    )
+
+    try:
+        yesterday_selection = DailySelection.objects.get(date=yesterday)
+    except DailySelection.DoesNotExist:
+        messages.warning(request, 'Brak wyboru z wczoraj do skopiowania.')
+        return _get_selection_partial(request, selection)
+
+    # Get yesterday's flavors (only active ones)
+    yesterday_flavors = yesterday_selection.flavors.filter(status='active')
+    flavor_count = yesterday_flavors.count()
+
+    if flavor_count == 0:
+        messages.info(request, 'Wczorajszy wybór był pusty lub wszystkie smaki zostały zarchiwizowane.')
+        return _get_selection_partial(request, selection)
+
+    # Clear current selection
+    selection.flavors.clear()
+    selection.hit_of_the_day = None
+
+    # Copy flavors
+    selection.flavors.set(yesterday_flavors)
+
+    # Copy display_order (filter to only include active flavors that exist)
+    active_ids = set(yesterday_flavors.values_list('id', flat=True))
+    new_order = [fid for fid in (yesterday_selection.display_order or []) if fid in active_ids]
+
+    # Add any flavors not in the order (append at end)
+    for flavor in yesterday_flavors:
+        if flavor.id not in new_order:
+            new_order.append(flavor.id)
+
+    selection.display_order = new_order
+    selection.save(update_fields=['display_order', 'hit_of_the_day'])
+
+    messages.success(request, f'Skopiowano {flavor_count} smaków z wczoraj.')
+
+    return _get_selection_partial(request, selection)
+
+
+@login_required
+@require_http_methods(["POST"])
+def clear_selection(request):
+    """
+    Clear today's selection - remove all flavors and reset hit.
+    """
+    today = timezone.now().date()
+    selection, _ = DailySelection.objects.get_or_create(
+        date=today,
+        defaults={'display_order': []}
+    )
+
+    count = selection.flavors.count()
+    selection.flavors.clear()
+    selection.hit_of_the_day = None
+    selection.display_order = []
+    selection.save(update_fields=['hit_of_the_day', 'display_order'])
+
+    messages.info(request, f'Wyczyszczono wybór ({count} smaków).')
+
+    return _get_selection_partial(request, selection)
+
+
+def _get_selection_partial(request, selection, sort_mode=False):
+    """
+    Helper to return the selection list partial with context.
+    Used by multiple endpoints after making changes.
+    """
+    # Get all active flavors
+    all_flavors = Flavor.objects.filter(status='active').order_by('name')
+
+    # Get selected flavor IDs
+    selected_ids = set(selection.flavors.values_list('id', flat=True))
+
+    # Build list with selection state
+    flavors_with_state = []
+    for flavor in all_flavors:
+        flavors_with_state.append({
+            'flavor': flavor,
+            'is_selected': flavor.id in selected_ids,
+            'is_hit': selection.hit_of_the_day_id == flavor.id,
+        })
+
+    # Get ordered flavors for display
+    selected_flavors = selection.get_ordered_flavors()
+
+    context = {
+        'selection': selection,
+        'flavors': flavors_with_state,
+        'selected_flavors': selected_flavors,
+        'today': selection.date,
+        'selected_count': len(selected_ids),
+        'sort_mode': sort_mode,
+    }
+
+    return render(request, 'admin/partials/daily_selection.html', context)
