@@ -1,0 +1,90 @@
+<!-- templates/admin/partials/selection_sort.html -->
+{% include "admin/partials/toast.html" %}
+
+<!-- Sort Mode Header -->
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-bold text-gray-800">Sortuj smaki</h2>
+    <button
+        hx-get="{% url 'flavors:admin_daily_selection' %}"
+        hx-target="#selection-container"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium min-h-[44px] hover:bg-blue-700 transition-colors"
+    >
+        Gotowe
+    </button>
+</div>
+
+<p class="text-sm text-gray-500 mb-4">
+    Użyj strzałek aby zmienić kolejność wyświetlania na stronie głównej.
+</p>
+
+<!-- Selected Flavors in Sort Mode -->
+<div class="border rounded-lg overflow-hidden">
+    {% for flavor in selected_flavors %}
+    <div class="flex items-center justify-between p-4 bg-white border-b min-h-[60px]">
+        <div class="flex items-center gap-3">
+            {% if selection.hit_of_the_day_id == flavor.id %}
+                <span class="text-yellow-500" title="Hit dnia">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                </span>
+            {% endif %}
+            <span class="font-medium text-gray-800">{{ flavor.name }}</span>
+        </div>
+
+        <div class="flex gap-2">
+            <!-- Up button -->
+            <button
+                hx-post="{% url 'flavors:admin_move_flavor' flavor.id 'up' %}"
+                hx-target="#selection-container"
+                hx-swap="innerHTML"
+                hx-sync="this:replace"
+                class="w-11 h-11 flex items-center justify-center bg-gray-100 rounded-lg {% if forloop.first %}opacity-30 cursor-not-allowed{% else %}hover:bg-gray-200{% endif %} transition-colors"
+                {% if forloop.first %}disabled aria-disabled="true"{% endif %}
+                aria-label="Przesuń w górę"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                </svg>
+            </button>
+
+            <!-- Down button -->
+            <button
+                hx-post="{% url 'flavors:admin_move_flavor' flavor.id 'down' %}"
+                hx-target="#selection-container"
+                hx-swap="innerHTML"
+                hx-sync="this:replace"
+                class="w-11 h-11 flex items-center justify-center bg-gray-100 rounded-lg {% if forloop.last %}opacity-30 cursor-not-allowed{% else %}hover:bg-gray-200{% endif %} transition-colors"
+                {% if forloop.last %}disabled aria-disabled="true"{% endif %}
+                aria-label="Przesuń w dół"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    {% empty %}
+    <div class="p-8 text-center text-gray-500">
+        Brak wybranych smaków do sortowania.
+        <button
+            hx-get="{% url 'flavors:admin_daily_selection' %}"
+            hx-target="#selection-container"
+            class="block mx-auto mt-2 text-blue-600 hover:underline"
+        >
+            Wróć do wyboru
+        </button>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Back to selection link -->
+<div class="mt-4 text-center">
+    <button
+        hx-get="{% url 'flavors:admin_daily_selection' %}"
+        hx-target="#selection-container"
+        class="text-gray-500 hover:text-gray-700 underline"
+    >
+        Anuluj sortowanie
+    </button>
+</div>
