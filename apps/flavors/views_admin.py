@@ -156,3 +156,103 @@ def archived_flavors(request):
     """List all archived flavors with restore option."""
     flavors = Flavor.objects.filter(status='archived').order_by('name')
     return render(request, 'admin/archived_flavors.html', {'flavors': flavors})
+
+
+# ============================================================================
+# DAILY SELECTION VIEWS
+# ============================================================================
+
+@login_required
+@require_http_methods(["GET"])
+def daily_selection(request):
+    """
+    Main daily selection interface.
+    Shows all active flavors with their selection state for today.
+    """
+    today = timezone.now().date()
+    selection, created = DailySelection.objects.get_or_create(
+        date=today,
+        defaults={'display_order': []}
+    )
+
+    # Get all active flavors
+    all_flavors = Flavor.objects.filter(status='active').order_by('name')
+
+    # Get selected flavor IDs for efficient lookup
+    selected_ids = set(selection.flavors.values_list('id', flat=True))
+
+    # Build list with selection state
+    flavors_with_state = []
+    for flavor in all_flavors:
+        flavors_with_state.append({
+            'flavor': flavor,
+            'is_selected': flavor.id in selected_ids,
+            'is_hit': selection.hit_of_the_day_id == flavor.id,
+        })
+
+    # Get ordered flavors for display
+    selected_flavors = selection.get_ordered_flavors()
+
+    context = {
+        'selection': selection,
+        'flavors': flavors_with_state,
+        'selected_flavors': selected_flavors,
+        'today': today,
+        'selected_count': len(selected_ids),
+    }
+
+    if request.htmx:
+        return render(request, 'admin/partials/daily_selection.html', context)
+
+    return render(request, 'admin/daily_selection.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def toggle_flavor(request, flavor_id):
+    """
+    Toggle a flavor in/out of today's selection.
+    Returns partial row template with updated state.
+    """
+    today = timezone.now().date()
+    selection, _ = DailySelection.objects.get_or_create(
+        date=today,
+        defaults={'display_order': []}
+    )
+
+    flavor = get_object_or_404(Flavor, pk=flavor_id, status='active')
+
+    # Check if flavor is currently selected
+    is_selected = selection.flavors.filter(pk=flavor_id).exists()
+
+    if is_selected:
+        # Remove from selection
+        selection.flavors.remove(flavor)
+        selection.remove_flavor_from_order(flavor_id)
+
+        # If this was the hit, clear it
+        if selection.hit_of_the_day_id == flavor_id:
+            selection.hit_of_the_day = None
+            selection.save(update_fields=['hit_of_the_day'])
+
+        messages.info(request, f'Usunięto: {flavor.name}')
+    else:
+        # Add to selection
+        selection.flavors.add(flavor)
+        selection.add_flavor_to_order(flavor_id)
+        messages.success(request, f'Dodano: {flavor.name}')
+
+    # Refresh selection state
+    is_selected = not is_selected
+    is_hit = selection.hit_of_the_day_id == flavor_id
+
+    context = {
+        'item': {
+            'flavor': flavor,
+            'is_selected': is_selected,
+            'is_hit': is_hit,
+        },
+        'selection': selection,
+    }
+
+    return render(request, 'admin/partials/flavor_toggle_row.html', context)
