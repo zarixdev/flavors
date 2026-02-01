@@ -119,3 +119,67 @@ class DailySelection(models.Model):
 
     def __str__(self):
         return f"Dzisiejsze smaki: {self.date}"
+
+    def get_ordered_flavors(self):
+        """
+        Return flavors in display_order, with any unlisted flavors appended at end.
+        Uses order_map for efficient sorting.
+        """
+        all_flavors = list(self.flavors.all())
+        if not all_flavors:
+            return []
+
+        # Build order mapping: flavor_id -> position in display_order
+        order_map = {fid: idx for idx, fid in enumerate(self.display_order or [])}
+
+        # Sort: flavors in display_order by their position, then unlisted flavors at end
+        def sort_key(flavor):
+            if flavor.id in order_map:
+                return (0, order_map[flavor.id])
+            return (1, 0)  # Unlisted flavors come after
+
+        return sorted(all_flavors, key=sort_key)
+
+    def add_flavor_to_order(self, flavor_id):
+        """
+        Append flavor ID to display_order if not already present.
+        Call this when adding a flavor to the selection.
+        """
+        if self.display_order is None:
+            self.display_order = []
+
+        if flavor_id not in self.display_order:
+            self.display_order.append(flavor_id)
+            self.save(update_fields=['display_order'])
+
+    def remove_flavor_from_order(self, flavor_id):
+        """
+        Remove flavor ID from display_order if present.
+        Call this when removing a flavor from the selection.
+        """
+        if self.display_order and flavor_id in self.display_order:
+            self.display_order = [fid for fid in self.display_order if fid != flavor_id]
+            self.save(update_fields=['display_order'])
+
+    def move_flavor(self, flavor_id, direction):
+        """
+        Move flavor up or down in display_order.
+        direction: -1 for up (earlier), +1 for down (later)
+        Returns True if move was successful, False otherwise.
+        """
+        if not self.display_order or flavor_id not in self.display_order:
+            return False
+
+        current_index = self.display_order.index(flavor_id)
+        new_index = current_index + direction
+
+        # Validate boundary conditions
+        if new_index < 0 or new_index >= len(self.display_order):
+            return False
+
+        # Swap positions
+        self.display_order[current_index], self.display_order[new_index] = \
+            self.display_order[new_index], self.display_order[current_index]
+
+        self.save(update_fields=['display_order'])
+        return True
