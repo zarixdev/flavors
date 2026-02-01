@@ -1,0 +1,15 @@
+/* static/css/custom.css */
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.animate-fade-out {
+    animation: fadeOut 3s forwards;
+}
+
+.min-touch-target {
+    min-width: 44px;
+    min-height: 44px;
+}
