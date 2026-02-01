@@ -15,11 +15,11 @@
     <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
         <div class="max-w-lg mx-auto px-4 py-3">
             <div class="flex items-center justify-between">
-                <a href="{% url 'admin_dashboard' %}" class="font-bold text-lg">Smaki Lodów</a>
+                <a href="{% url 'flavors:admin_dashboard' %}" class="font-bold text-lg">Smaki Lodów</a>
                 <div class="flex gap-4">
                     <a href="{% url 'flavors:admin_daily_selection' %}" class="text-sm text-gray-600">Dziś</a>
-                    <a href="{% url 'admin_flavor_list' %}" class="text-sm text-gray-600">Baza</a>
-                    <a href="{% url 'admin_logout' %}" class="text-sm text-red-600">Wyloguj</a>
+                    <a href="{% url 'flavors:admin_flavor_list' %}" class="text-sm text-gray-600">Baza</a>
+                    <a href="{% url 'flavors:admin_logout' %}" class="text-sm text-red-600">Wyloguj</a>
                 </div>
             </div>
         </div>
