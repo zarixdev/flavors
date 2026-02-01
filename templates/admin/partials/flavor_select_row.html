@@ -6,6 +6,10 @@
     hx-swap="outerHTML"
     hx-sync="this:replace"
     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    hx-indicator="this"
+    hx-disabled-elt="this"
+    aria-busy="false"
+    data-hx-aria-busy="true"
 >
     <span class="font-medium {% if is_selected %}text-blue-700{% else %}text-gray-700{% endif %}">
         {{ flavor.name }}
@@ -21,6 +25,8 @@
             hx-swap="innerHTML"
             hx-sync="this:replace"
             hx-stop
+            hx-indicator="this"
+            hx-disabled-elt="this"
             aria-label="{% if selection.hit_of_the_day_id == flavor.id %}Usuń hit dnia{% else %}Ustaw hit dnia{% endif %}"
         >
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
