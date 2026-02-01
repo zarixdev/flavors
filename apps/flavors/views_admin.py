@@ -1,12 +1,17 @@
+import logging
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.utils import timezone
+from django.http import HttpResponse
 
 from .models import Flavor, DailySelection
 from .forms import FlavorForm
+
+logger = logging.getLogger(__name__)
 
 
 def admin_login(request):
@@ -225,29 +230,34 @@ def toggle_flavor(request, flavor_id):
     # Check if flavor is currently selected
     is_selected = selection.flavors.filter(pk=flavor_id).exists()
 
-    if is_selected:
-        # Remove from selection
-        selection.flavors.remove(flavor)
-        selection.remove_flavor_from_order(flavor_id)
+    try:
+        if is_selected:
+            # Remove from selection
+            selection.flavors.remove(flavor)
+            selection.remove_flavor_from_order(flavor_id)
 
-        # If this was the hit, clear it
-        if selection.hit_of_the_day_id == flavor_id:
-            selection.hit_of_the_day = None
-            selection.save(update_fields=['hit_of_the_day'])
+            # If this was the hit, clear it
+            if selection.hit_of_the_day_id == flavor_id:
+                selection.hit_of_the_day = None
+                selection.save(update_fields=['hit_of_the_day'])
 
-        messages.info(request, f'Usunięto: {flavor.name}')
-    else:
-        # Add to selection
-        selection.flavors.add(flavor)
-        selection.add_flavor_to_order(flavor_id)
-        messages.success(request, f'Dodano: {flavor.name}')
+            messages.info(request, f'Usunięto: {flavor.name}')
+        else:
+            # Add to selection
+            selection.flavors.add(flavor)
+            selection.add_flavor_to_order(flavor_id)
+            messages.success(request, f'Dodano: {flavor.name}')
 
-    # Refresh selection state
-    is_selected = not is_selected
+        # Refresh selection state
+        is_selected = not is_selected
+
+    except Exception as e:
+        logger.error(f"Error in toggle_flavor for flavor_id={flavor_id}: {e}")
+        messages.error(request, 'Nie udało się zaktualizować wyboru. Spróbuj ponownie.')
 
     context = {
         'flavor': flavor,
-        'is_selected': is_selected,
+        'is_selected': is_selected if 'is_selected' in locals() else False,
         'selection': selection,
     }
 
@@ -275,15 +285,19 @@ def set_hit(request, flavor_id):
         messages.error(request, 'Wybierz najpierw ten smak, aby ustawić hit dnia.')
         return _get_selection_partial(request, selection)
 
-    # Toggle hit state
-    if selection.hit_of_the_day_id == flavor_id:
-        selection.hit_of_the_day = None
-        selection.save(update_fields=['hit_of_the_day'])
-        messages.info(request, f'Usunięto hit dnia: {flavor.name}')
-    else:
-        selection.hit_of_the_day = flavor
-        selection.save(update_fields=['hit_of_the_day'])
-        messages.success(request, f'Hit dnia: {flavor.name}')
+    try:
+        # Toggle hit state
+        if selection.hit_of_the_day_id == flavor_id:
+            selection.hit_of_the_day = None
+            selection.save(update_fields=['hit_of_the_day'])
+            messages.info(request, f'Usunięto hit dnia: {flavor.name}')
+        else:
+            selection.hit_of_the_day = flavor
+            selection.save(update_fields=['hit_of_the_day'])
+            messages.success(request, f'Hit dnia: {flavor.name}')
+    except Exception as e:
+        logger.error(f"Error in set_hit for flavor_id={flavor_id}: {e}")
+        messages.error(request, 'Nie udało się ustawić hitu dnia. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection)
 
@@ -309,15 +323,19 @@ def move_flavor(request, flavor_id, direction):
         messages.error(request, 'Nieprawidłowy kierunek.')
         return _get_selection_partial(request, selection)
 
-    # Perform the move
-    success = selection.move_flavor(flavor_id, direction_value)
+    try:
+        # Perform the move
+        success = selection.move_flavor(flavor_id, direction_value)
 
-    if success:
-        flavor = get_object_or_404(Flavor, pk=flavor_id)
-        direction_label = 'wyżej' if direction_value == -1 else 'niżej'
-        messages.success(request, f'Przesunięto {flavor.name} {direction_label}')
-    else:
-        messages.info(request, 'Nie można przesunąć dalej.')
+        if success:
+            flavor = get_object_or_404(Flavor, pk=flavor_id)
+            direction_label = 'wyżej' if direction_value == -1 else 'niżej'
+            messages.success(request, f'Przesunięto {flavor.name} {direction_label}')
+        else:
+            messages.info(request, 'Nie można przesunąć dalej.')
+    except Exception as e:
+        logger.error(f"Error in move_flavor for flavor_id={flavor_id}, direction={direction}: {e}")
+        messages.error(request, 'Nie udało się zmienić kolejności. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection, sort_mode=True)
 
@@ -351,26 +369,30 @@ def copy_from_yesterday(request):
         messages.info(request, 'Wczorajszy wybór był pusty lub wszystkie smaki zostały zarchiwizowane.')
         return _get_selection_partial(request, selection)
 
-    # Clear current selection
-    selection.flavors.clear()
-    selection.hit_of_the_day = None
+    try:
+        # Clear current selection
+        selection.flavors.clear()
+        selection.hit_of_the_day = None
 
-    # Copy flavors
-    selection.flavors.set(yesterday_flavors)
+        # Copy flavors
+        selection.flavors.set(yesterday_flavors)
 
-    # Copy display_order (filter to only include active flavors that exist)
-    active_ids = set(yesterday_flavors.values_list('id', flat=True))
-    new_order = [fid for fid in (yesterday_selection.display_order or []) if fid in active_ids]
+        # Copy display_order (filter to only include active flavors that exist)
+        active_ids = set(yesterday_flavors.values_list('id', flat=True))
+        new_order = [fid for fid in (yesterday_selection.display_order or []) if fid in active_ids]
 
-    # Add any flavors not in the order (append at end)
-    for flavor in yesterday_flavors:
-        if flavor.id not in new_order:
-            new_order.append(flavor.id)
+        # Add any flavors not in the order (append at end)
+        for flavor in yesterday_flavors:
+            if flavor.id not in new_order:
+                new_order.append(flavor.id)
 
-    selection.display_order = new_order
-    selection.save(update_fields=['display_order', 'hit_of_the_day'])
+        selection.display_order = new_order
+        selection.save(update_fields=['display_order', 'hit_of_the_day'])
 
-    messages.success(request, f'Skopiowano {flavor_count} smaków z wczoraj.')
+        messages.success(request, f'Skopiowano {flavor_count} smaków z wczoraj.')
+    except Exception as e:
+        logger.error(f"Error in copy_from_yesterday: {e}")
+        messages.error(request, 'Nie udało się skopiować wczorajszego wyboru. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection)
 
@@ -388,12 +410,16 @@ def clear_selection(request):
     )
 
     count = selection.flavors.count()
-    selection.flavors.clear()
-    selection.hit_of_the_day = None
-    selection.display_order = []
-    selection.save(update_fields=['hit_of_the_day', 'display_order'])
 
-    messages.info(request, f'Wyczyszczono wybór ({count} smaków).')
+    try:
+        selection.flavors.clear()
+        selection.hit_of_the_day = None
+        selection.display_order = []
+        selection.save(update_fields=['hit_of_the_day', 'display_order'])
+        messages.info(request, f'Wyczyszczono wybór ({count} smaków).')
+    except Exception as e:
+        logger.error(f"Error in clear_selection: {e}")
+        messages.error(request, 'Nie udało się wyczyścić wyboru. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection)
 
