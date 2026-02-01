@@ -1,0 +1,38 @@
+<!-- templates/admin/partials/flavor_select_row.html -->
+<div
+    class="flavor-row flex items-center justify-between p-4 border-b min-h-[60px] cursor-pointer select-none {% if is_selected %}bg-blue-50 border-blue-200{% else %}bg-white{% endif %}"
+    hx-post="{% url 'flavors:admin_toggle_flavor' flavor.id %}"
+    hx-target="this"
+    hx-swap="outerHTML"
+    hx-sync="this:replace"
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+>
+    <span class="font-medium {% if is_selected %}text-blue-700{% else %}text-gray-700{% endif %}">
+        {{ flavor.name }}
+    </span>
+
+    {% if is_selected %}
+        <!-- Hit of day button (only visible when selected) -->
+        <button
+            type="button"
+            class="hit-btn min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full {% if selection.hit_of_the_day_id == flavor.id %}text-yellow-500{% else %}text-gray-300 hover:text-yellow-400{% endif %}"
+            hx-post="{% url 'flavors:admin_set_hit' flavor.id %}"
+            hx-target="#selection-container"
+            hx-swap="innerHTML"
+            hx-sync="this:replace"
+            hx-stop
+            aria-label="{% if selection.hit_of_the_day_id == flavor.id %}Usuń hit dnia{% else %}Ustaw hit dnia{% endif %}"
+        >
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            </svg>
+        </button>
+    {% else %}
+        <!-- Visual indicator for non-selected state -->
+        <span class="text-gray-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+        </span>
+    {% endif %}
+</div>
