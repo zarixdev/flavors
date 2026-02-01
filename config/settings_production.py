@@ -52,7 +52,7 @@ if USE_HTTPS:
     # HSTS (HTTP Strict Transport Security)
     # Forces browsers to use HTTPS for 1 year (in seconds)
     SECURE_HSTS_SECONDS = 31536000  # 1 year
-    SECURE_HSTS_INCLUDE_SUBDEMANS = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
     # Secure cookies - only sent over HTTPS
