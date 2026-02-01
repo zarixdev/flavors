@@ -244,18 +244,14 @@ def toggle_flavor(request, flavor_id):
 
     # Refresh selection state
     is_selected = not is_selected
-    is_hit = selection.hit_of_the_day_id == flavor_id
 
     context = {
-        'item': {
-            'flavor': flavor,
-            'is_selected': is_selected,
-            'is_hit': is_hit,
-        },
+        'flavor': flavor,
+        'is_selected': is_selected,
         'selection': selection,
     }
 
-    return render(request, 'admin/partials/flavor_toggle_row.html', context)
+    return render(request, 'admin/partials/flavor_select_row.html', context)
 
 
 @login_required
@@ -402,6 +398,24 @@ def clear_selection(request):
     return _get_selection_partial(request, selection)
 
 
+@login_required
+@require_http_methods(["GET"])
+def daily_selection_sort(request):
+    """Sort mode for reordering selected flavors."""
+    today = timezone.now().date()
+    selection, _ = DailySelection.objects.get_or_create(
+        date=today,
+        defaults={'display_order': []}
+    )
+
+    selected_flavors = selection.get_ordered_flavors()
+
+    return render(request, 'admin/partials/selection_sort.html', {
+        'selection': selection,
+        'selected_flavors': selected_flavors,
+    })
+
+
 def _get_selection_partial(request, selection, sort_mode=False):
     """
     Helper to return the selection list partial with context.
@@ -429,9 +443,13 @@ def _get_selection_partial(request, selection, sort_mode=False):
         'selection': selection,
         'flavors': flavors_with_state,
         'selected_flavors': selected_flavors,
+        'all_flavors': all_flavors,
         'today': selection.date,
         'selected_count': len(selected_ids),
         'sort_mode': sort_mode,
     }
 
-    return render(request, 'admin/partials/daily_selection.html', context)
+    if sort_mode:
+        return render(request, 'admin/partials/selection_sort.html', context)
+
+    return render(request, 'admin/partials/selection_list.html', context)

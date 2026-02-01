@@ -19,6 +19,7 @@ urlpatterns = [
     path('admin/dzis/move/<int:flavor_id>/<str:direction>/', views_admin.move_flavor, name='admin_move_flavor'),
     path('admin/dzis/copy-yesterday/', views_admin.copy_from_yesterday, name='admin_copy_yesterday'),
     path('admin/dzis/clear/', views_admin.clear_selection, name='admin_clear_selection'),
+    path('admin/dzis/sort/', views_admin.daily_selection_sort, name='admin_daily_selection_sort'),
 
     # Flavor CRUD
     path('admin/flavors/', views_admin.flavor_list, name='admin_flavor_list'),

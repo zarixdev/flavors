@@ -6,6 +6,8 @@
     <title>{% block title %}Panel Admina{% endblock %}</title>
     {% load tailwind_cli %}
     {% tailwind_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="bg-gray-50 min-h-screen">
@@ -23,6 +25,11 @@
         </div>
     </nav>
     {% endif %}
+
+    <!-- Toast container for HTMX OOB updates -->
+    <div id="toast-container" class="max-w-lg mx-auto px-4 mt-4">
+        <!-- Toasts swapped here via hx-swap-oob -->
+    </div>
 
     <div id="messages-container" class="max-w-lg mx-auto px-4 mt-4">
         {% if messages %}

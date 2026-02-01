@@ -1,0 +1,29 @@
+<!-- templates/admin/daily_selection.html -->
+{% extends "admin/base_admin.html" %}
+{% load humanize %}
+
+{% block title %}Dzisiejsze Smaki - Panel Admina{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">Dzisiejsze Smaki</h1>
+    <p class="text-sm text-gray-500">
+        {{ today|date:"l, j E Y" }}
+        {% if selection.updated_at != selection.created_at %}
+            <span class="text-gray-400">| Zaktualizowano {{ selection.updated_at|naturaltime }}</span>
+        {% endif %}
+    </p>
+</div>
+
+<!-- Main selection interface container for HTMX swaps -->
+<div id="selection-container">
+    {% include "admin/partials/selection_list.html" %}
+</div>
+
+<!-- Link to public view -->
+<div class="mt-8 text-center">
+    <a href="{% url 'flavors:homepage' %}" target="_blank" class="text-blue-600 hover:underline text-sm">
+        Zobacz stronę publiczną ↗
+    </a>
+</div>
+{% endblock %}
