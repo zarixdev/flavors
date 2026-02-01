@@ -12,6 +12,14 @@ urlpatterns = [
     path('admin/logout/', views_admin.admin_logout, name='admin_logout'),
     path('admin/', views_admin.admin_dashboard, name='admin_dashboard'),
 
+    # Daily selection - MUST be before flavor_detail to avoid path conflict
+    path('admin/dzis/', views_admin.daily_selection, name='admin_daily_selection'),
+    path('admin/dzis/toggle/<int:flavor_id>/', views_admin.toggle_flavor, name='admin_toggle_flavor'),
+    path('admin/dzis/hit/<int:flavor_id>/', views_admin.set_hit, name='admin_set_hit'),
+    path('admin/dzis/move/<int:flavor_id>/<str:direction>/', views_admin.move_flavor, name='admin_move_flavor'),
+    path('admin/dzis/copy-yesterday/', views_admin.copy_from_yesterday, name='admin_copy_yesterday'),
+    path('admin/dzis/clear/', views_admin.clear_selection, name='admin_clear_selection'),
+
     # Flavor CRUD
     path('admin/flavors/', views_admin.flavor_list, name='admin_flavor_list'),
     path('admin/flavors/create/', views_admin.flavor_create, name='admin_flavor_create'),
