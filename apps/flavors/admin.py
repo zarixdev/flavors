@@ -1,3 +1,7 @@
+# Django admin registrations kept as backup/fallback
+# django.contrib.admin is currently disabled in INSTALLED_APPS
+# Custom admin panel is available at /panel/
+
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Flavor, DailySelection
