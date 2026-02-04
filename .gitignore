@@ -13,6 +13,7 @@ env/
 
 # Django
 static/css/tailwind.css
+staticfiles/
 media/
 
 # IDEs
