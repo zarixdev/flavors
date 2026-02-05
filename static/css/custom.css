@@ -185,3 +185,64 @@ button.htmx-request,
     opacity: 0.7;
     cursor: wait;
 }
+
+/* ============================================
+   Sortable Drag & Drop Styles
+   ============================================ */
+
+/* Sortable container */
+#sortable-flavors {
+    touch-action: pan-y;
+}
+
+/* Sortable item */
+.sortable-item {
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+/* Ghost (placeholder during drag) */
+.sortable-item.sortable-ghost {
+    opacity: 0.4;
+    background-color: #f3f4f6;
+    border: 2px dashed #d1d5db;
+}
+
+/* Dragging item */
+.sortable-item.sortable-drag {
+    opacity: 0.9;
+    background-color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: scale(1.02);
+    z-index: 10;
+}
+
+/* Drag handle */
+.drag-handle {
+    cursor: grab;
+    transition: color 0.15s ease;
+}
+
+.drag-handle:hover {
+    color: #6b7280;
+}
+
+.sortable-item:active .drag-handle {
+    cursor: grabbing;
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+    .sortable-item {
+        min-height: 64px;
+    }
+    .drag-handle {
+        padding: 8px;
+        margin: -8px;
+    }
+}
+
+/* HTMX loading during sort save */
+#sortable-flavors.htmx-request {
+    opacity: 0.7;
+    pointer-events: none;
+}
