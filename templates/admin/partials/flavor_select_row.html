@@ -1,6 +1,6 @@
 <!-- templates/admin/partials/flavor_select_row.html -->
 <div
-    class="flavor-row flex items-center justify-between p-4 border-b min-h-[60px] cursor-pointer select-none {% if is_selected %}bg-green-50 border-green-200{% else %}bg-white{% endif %}"
+    class="flavor-row flex items-center justify-between p-4 border-b min-h-[60px] cursor-pointer select-none {% if is_selected %}flavor-row--selected bg-green-50 border-green-200{% else %}flavor-row--unselected bg-white{% endif %}"
     hx-post="{% url 'flavors:admin_toggle_flavor' flavor.id %}"
     hx-target="this"
     hx-swap="outerHTML"
@@ -11,12 +11,13 @@
     aria-busy="false"
     data-hx-aria-busy="true"
 >
-    <span class="font-medium {% if is_selected %}text-green-700{% else %}text-gray-700{% endif %}">
+    <span class="flavor-name font-medium {% if is_selected %}text-green-700{% else %}text-gray-700{% endif %}">
         {{ flavor.name }}
     </span>
 
     {% if is_selected %}
-        <!-- Hit of day button (only visible when selected) -->
+        <!-- Action buttons container - supports: delete | move | hit (hit at end) -->
+        <div class="flex items-center gap-2">
         {% if selection.hit_of_the_day_id == flavor.id %}
             <!-- Active hit state: filled gold star with amber styling -->
             <button
@@ -58,12 +59,13 @@
                 <span>HIT</span>
             </button>
         {% endif %}
+            <!-- Future: Delete button goes here (before hit) -->
+            <!-- Future: Drag handle goes here (before hit) -->
+        </div>
     {% else %}
         <!-- Visual indicator for non-selected state -->
-        <span class="text-gray-300">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
+        <span class="w-6 h-6 rounded-full border-2 border-gray-200 flex items-center justify-center">
+            <span class="w-2 h-2 rounded-full bg-gray-100"></span>
         </span>
     {% endif %}
 </div>
