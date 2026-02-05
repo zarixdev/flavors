@@ -116,6 +116,7 @@ class DailySelection(models.Model):
     )
     display_order = models.JSONField(default=list, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_updated = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Dzisiejsze smaki: {self.date}"
