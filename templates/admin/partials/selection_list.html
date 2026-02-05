@@ -44,12 +44,7 @@
 </div>
 
 <!-- Selection Info -->
-<div class="text-sm text-gray-500 mb-4">
-    Wybrano: {{ selection.flavors.count }} z {{ all_flavors|length }} smaków
-    {% if selection.hit_of_the_day %}
-        | Hit: {{ selection.hit_of_the_day.name|clean_flavor_name }}
-    {% endif %}
-</div>
+{% include "admin/partials/live_counter.html" with selected_count=selection.flavors.count total_count=all_flavors|length hit_name=selection.hit_of_the_day.name %}
 
 <!-- Flavor List -->
 <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
