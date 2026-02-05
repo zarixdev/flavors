@@ -1,6 +1,6 @@
 <!-- templates/admin/partials/flavor_select_row.html -->
 <div
-    class="flavor-row flex items-center justify-between p-4 border-b min-h-[60px] cursor-pointer select-none {% if is_selected %}bg-blue-50 border-blue-200{% else %}bg-white{% endif %}"
+    class="flavor-row flex items-center justify-between p-4 border-b min-h-[60px] cursor-pointer select-none {% if is_selected %}bg-green-50 border-green-200{% else %}bg-white{% endif %}"
     hx-post="{% url 'flavors:admin_toggle_flavor' flavor.id %}"
     hx-target="this"
     hx-swap="outerHTML"
@@ -11,7 +11,7 @@
     aria-busy="false"
     data-hx-aria-busy="true"
 >
-    <span class="font-medium {% if is_selected %}text-blue-700{% else %}text-gray-700{% endif %}">
+    <span class="font-medium {% if is_selected %}text-green-700{% else %}text-gray-700{% endif %}">
         {{ flavor.name }}
     </span>
 
