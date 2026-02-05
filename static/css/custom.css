@@ -125,3 +125,40 @@ button.htmx-request,
 .htmx-request.hx-pulse {
     animation: hx-pulse 1s ease-in-out infinite;
 }
+
+/* ============================================
+   Flavor Row State Classes
+   ============================================ */
+
+.flavor-row {
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+/* Unselected state - neutral, clean */
+.flavor-row--unselected {
+    background-color: var(--flavor-unselected-bg);
+    border-color: var(--flavor-unselected-border);
+}
+
+.flavor-row--unselected .flavor-name {
+    color: var(--flavor-unselected-text);
+}
+
+/* Selected state - subtle green */
+.flavor-row--selected {
+    background-color: var(--flavor-selected-bg);
+    border-color: var(--flavor-selected-border);
+}
+
+.flavor-row--selected .flavor-name {
+    color: var(--flavor-selected-text);
+}
+
+/* HTMX loading states for rows */
+.flavor-row.htmx-request {
+    opacity: 0.7;
+}
+
+.flavor-row--selected.htmx-request {
+    background-color: #dcfce7; /* slightly darker green during request */
+}
