@@ -43,6 +43,9 @@
     {% endif %}
 </div>
 
+<!-- Timestamp -->
+{% include "admin/partials/live_timestamp.html" with timestamp=selection.last_updated show_timestamp=selection.flavors.exists %}
+
 <!-- Selection Info -->
 {% include "admin/partials/live_counter.html" with selected_count=selection.flavors.count total_count=all_flavors|length hit_name=selection.hit_of_the_day.name %}
 
