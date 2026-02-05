@@ -421,9 +421,12 @@ def clear_selection(request):
         selection.hit_of_the_day = None
         selection.display_order = []
         selection.save(update_fields=['hit_of_the_day', 'display_order'])
-        messages.info(request, f'Wyczyszczono wybór ({count} smaków).')
+        # Silent for HTMX requests - visual state change is feedback enough
+        if not request.htmx:
+            messages.info(request, f'Wyczyszczono wybór ({count} smaków).')
     except Exception as e:
         logger.error(f"Error in clear_selection: {e}")
+        # Errors always show, regardless of HTMX
         messages.error(request, 'Nie udało się wyczyścić wyboru. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection)
