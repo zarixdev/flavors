@@ -162,3 +162,26 @@ button.htmx-request,
 .flavor-row--selected.htmx-request {
     background-color: #dcfce7; /* slightly darker green during request */
 }
+
+/* ============================================
+   Hit Button Transitions (Plan 07-01)
+   ============================================ */
+
+/* Hit button state transitions */
+.hit-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.hit-btn:hover {
+    transform: scale(1.02);
+}
+
+.hit-btn:active {
+    transform: scale(0.98);
+}
+
+/* HTMX loading state for hit button */
+.hit-btn.htmx-request {
+    opacity: 0.7;
+    cursor: wait;
+}
