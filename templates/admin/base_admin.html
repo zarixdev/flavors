@@ -9,6 +9,10 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <!-- SortableJS for drag & drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js" defer></script>
+    <!-- htmx-sort plugin for HTMX integration -->
+    <script src="https://cdn.jsdelivr.net/npm/htmx-ext-sortable@latest/sortable.min.js" defer></script>
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="bg-gray-50 min-h-screen">
     {% if user.is_authenticated %}
