@@ -48,15 +48,17 @@
 </div>
 
 <!-- Flavor List -->
-<div class="border rounded-lg overflow-hidden">
+<div class="border rounded-lg overflow-hidden bg-white shadow-sm">
     {% for item in flavors %}
         {% with flavor=item.flavor is_selected=item.is_selected %}
         {% include "admin/partials/flavor_select_row.html" %}
         {% endwith %}
     {% empty %}
         <div class="p-8 text-center text-gray-500">
-            Brak aktywnych smaków w bazie.
-            <a href="{% url 'flavors:admin_flavor_create' %}" class="text-blue-600 hover:underline">Dodaj pierwszy smak</a>
+            <p class="mb-2">Brak aktywnych smaków w bazie.</p>
+            <a href="{% url 'flavors:admin_flavor_create' %}" class="text-green-600 hover:text-green-700 font-medium hover:underline transition-colors">
+                Dodaj pierwszy smak
+            </a>
         </div>
     {% endfor %}
 </div>
