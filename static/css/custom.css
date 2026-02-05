@@ -1,6 +1,31 @@
 /* static/css/custom.css */
 
 /* ============================================
+   Ice Cream Shop Theme Colors
+   ============================================ */
+
+:root {
+    /* Selection states */
+    --flavor-selected-bg: #f0fdf4;        /* green-50 */
+    --flavor-selected-border: #bbf7d0;    /* green-200 */
+    --flavor-selected-text: #15803d;      /* green-700 */
+
+    /* Hit states */
+    --flavor-hit-active-bg: #fef3c7;      /* amber-100 */
+    --flavor-hit-active-border: #fcd34d;  /* amber-300 */
+    --flavor-hit-active-text: #b45309;    /* amber-700 */
+    --flavor-hit-icon: #fbbf24;           /* amber-400 */
+
+    /* Unselected states */
+    --flavor-unselected-bg: #ffffff;
+    --flavor-unselected-border: #e5e7eb;  /* gray-200 */
+    --flavor-unselected-text: #374151;    /* gray-700 */
+
+    /* Transitions */
+    --state-transition: all 0.2s ease-in-out;
+}
+
+/* ============================================
    Toast Animation
    ============================================ */
 @keyframes fadeOut {
