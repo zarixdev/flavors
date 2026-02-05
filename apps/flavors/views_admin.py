@@ -260,13 +260,19 @@ def toggle_flavor(request, flavor_id):
         # Errors always show, regardless of HTMX
         messages.error(request, 'Nie udało się zaktualizować wyboru. Spróbuj ponownie.')
 
+    # Refresh selected_ids after toggle for counter context
+    selected_ids = set(selection.flavors.values_list('id', flat=True))
+
     context = {
         'flavor': flavor,
         'is_selected': is_selected if 'is_selected' in locals() else False,
         'selection': selection,
+        'selected_count': len(selected_ids),
+        'total_count': Flavor.objects.filter(status='active').count(),
+        'hit_name': selection.hit_of_the_day.name if selection.hit_of_the_day else None,
     }
 
-    return render(request, 'admin/partials/flavor_select_row.html', context)
+    return render(request, 'admin/partials/toggle_response.html', context)
 
 
 @login_required
