@@ -1,3 +1,4 @@
+{% load flavor_tags %}
 <!-- templates/admin/partials/flavor_select_row.html -->
 <div
     class="flavor-row flex items-center justify-between p-4 border-b min-h-[60px] cursor-pointer select-none {% if is_selected %}flavor-row--selected bg-green-50 border-green-200{% else %}flavor-row--unselected bg-white{% endif %}"
@@ -12,7 +13,7 @@
     data-hx-aria-busy="true"
 >
     <span class="flavor-name font-medium {% if is_selected %}text-green-700{% else %}text-gray-700{% endif %}">
-        {{ flavor.name }}
+        {{ flavor.name|clean_flavor_name }}
     </span>
 
     {% if is_selected %}
