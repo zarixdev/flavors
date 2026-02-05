@@ -442,6 +442,53 @@ def daily_selection_sort(request):
     })
 
 
+@login_required
+@require_http_methods(["POST"])
+def reorder_flavors(request):
+    """
+    Reorder selected flavors based on sortable POST data.
+    Expects form data with 'flavor_order' containing ordered flavor IDs.
+    """
+    today = timezone.now().date()
+    selection, _ = DailySelection.objects.get_or_create(
+        date=today,
+        defaults={'display_order': []}
+    )
+
+    # Get ordered IDs from form data (htmx-sort sends: flavor_order=1&flavor_order=3...)
+    ordered_ids = request.POST.getlist('flavor_order')
+
+    if not ordered_ids:
+        messages.error(request, 'Nie przesłano nowej kolejności.')
+        return _get_selection_partial(request, selection, sort_mode=True)
+
+    try:
+        # Convert to integers
+        ordered_ids = [int(fid) for fid in ordered_ids]
+
+        # Validate all selected flavors are present
+        selected_ids = set(selection.flavors.values_list('id', flat=True))
+        received_ids = set(ordered_ids)
+
+        if received_ids != selected_ids:
+            messages.error(request, 'Nieprawidłowa kolejność - brakujące lub dodatkowe smaki.')
+            return _get_selection_partial(request, selection, sort_mode=True)
+
+        # Save new order
+        selection.display_order = ordered_ids
+        selection.save(update_fields=['display_order'])
+        messages.success(request, 'Kolejność została zaktualizowana.')
+
+    except (ValueError, TypeError) as e:
+        logger.error(f"Error parsing flavor order: {e}")
+        messages.error(request, 'Nieprawidłowy format danych.')
+    except Exception as e:
+        logger.error(f"Error in reorder_flavors: {e}")
+        messages.error(request, 'Nie udało się zmienić kolejności. Spróbuj ponownie.')
+
+    return _get_selection_partial(request, selection, sort_mode=True)
+
+
 def _get_selection_partial(request, selection, sort_mode=False):
     """
     Helper to return the selection list partial with context.
