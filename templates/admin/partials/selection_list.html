@@ -16,15 +16,18 @@
             Kopiuj z wczoraj
         </button>
     {% else %}
-        <!-- Has flavors: Show sort button (URL created in Task 5) and clear -->
+        <!-- Has flavors: Show sort button and clear -->
         <button
             hx-get="{% url 'flavors:admin_daily_selection_sort' %}"
             hx-target="#selection-container"
             hx-indicator="this"
             hx-disabled-elt="this"
-            class="flex-1 bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg font-medium min-h-[48px] hover:bg-gray-50 transition-colors"
+            class="flex-1 bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg font-medium min-h-[48px] hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
         >
-            Sortuj
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            Zmień kolejność
         </button>
         <button
             hx-post="{% url 'flavors:admin_clear_selection' %}"
