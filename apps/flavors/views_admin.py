@@ -252,6 +252,10 @@ def toggle_flavor(request, flavor_id):
             if not request.htmx:
                 messages.success(request, f'Dodano: {flavor.name}')
 
+        # Update last_updated timestamp
+        selection.last_updated = timezone.now()
+        selection.save(update_fields=['last_updated'])
+
         # Refresh selection state
         is_selected = not is_selected
 
@@ -310,6 +314,10 @@ def set_hit(request, flavor_id):
             # Silent for HTMX requests - visual state change is feedback enough
             if not request.htmx:
                 messages.success(request, f'Hit dnia: {flavor.name}')
+
+        # Update last_updated timestamp
+        selection.last_updated = timezone.now()
+        selection.save(update_fields=['last_updated'])
     except Exception as e:
         logger.error(f"Error in set_hit for flavor_id={flavor_id}: {e}")
         # Errors always show, regardless of HTMX
@@ -403,7 +411,8 @@ def copy_from_yesterday(request):
                 new_order.append(flavor.id)
 
         selection.display_order = new_order
-        selection.save(update_fields=['display_order', 'hit_of_the_day'])
+        selection.last_updated = timezone.now()
+        selection.save(update_fields=['display_order', 'hit_of_the_day', 'last_updated'])
 
         messages.success(request, f'Skopiowano {flavor_count} smaków z wczoraj.')
     except Exception as e:
@@ -431,7 +440,8 @@ def clear_selection(request):
         selection.flavors.clear()
         selection.hit_of_the_day = None
         selection.display_order = []
-        selection.save(update_fields=['hit_of_the_day', 'display_order'])
+        selection.last_updated = timezone.now()
+        selection.save(update_fields=['hit_of_the_day', 'display_order', 'last_updated'])
         # Silent for HTMX requests - visual state change is feedback enough
         if not request.htmx:
             messages.info(request, f'Wyczyszczono wybór ({count} smaków).')
