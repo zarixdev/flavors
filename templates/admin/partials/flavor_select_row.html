@@ -5,7 +5,7 @@
     hx-post="{% url 'flavors:admin_toggle_flavor' flavor.id %}"
     hx-target="this"
     hx-swap="outerHTML"
-    hx-sync="this:replace"
+    hx-sync="closest #selection-container:replace"
     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
     hx-indicator="this"
     hx-disabled-elt="this"
@@ -27,7 +27,7 @@
                 hx-post="{% url 'flavors:admin_set_hit' flavor.id %}"
                 hx-target="#selection-container"
                 hx-swap="innerHTML"
-                hx-sync="this:replace"
+                hx-sync="closest #selection-container:replace"
                 hx-stop
                 hx-indicator="this"
                 hx-disabled-elt="this"
@@ -47,7 +47,7 @@
                 hx-post="{% url 'flavors:admin_set_hit' flavor.id %}"
                 hx-target="#selection-container"
                 hx-swap="innerHTML"
-                hx-sync="this:replace"
+                hx-sync="closest #selection-container:replace"
                 hx-stop
                 hx-indicator="this"
                 hx-disabled-elt="this"

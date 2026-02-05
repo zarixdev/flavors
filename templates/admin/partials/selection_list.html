@@ -50,7 +50,7 @@
 {% include "admin/partials/live_counter.html" with selected_count=selection.flavors.count total_count=all_flavors|length hit_name=selection.hit_of_the_day.name %}
 
 <!-- Flavor List -->
-<div class="border rounded-lg overflow-hidden bg-white shadow-sm">
+<div id="selection-container" class="border rounded-lg overflow-hidden bg-white shadow-sm" hx-sync="this:replace">
     {% for item in flavors %}
         {% with flavor=item.flavor is_selected=item.is_selected %}
         {% include "admin/partials/flavor_select_row.html" %}
