@@ -1,3 +1,4 @@
+{% load flavor_tags %}
 <!-- templates/admin/partials/selection_list.html -->
 {% include "admin/partials/toast.html" %}
 
@@ -46,7 +47,7 @@
 <div class="text-sm text-gray-500 mb-4">
     Wybrano: {{ selection.flavors.count }} z {{ all_flavors|length }} smaków
     {% if selection.hit_of_the_day %}
-        | Hit: {{ selection.hit_of_the_day.name }}
+        | Hit: {{ selection.hit_of_the_day.name|clean_flavor_name }}
     {% endif %}
 </div>
 
