@@ -241,18 +241,23 @@ def toggle_flavor(request, flavor_id):
                 selection.hit_of_the_day = None
                 selection.save(update_fields=['hit_of_the_day'])
 
-            messages.info(request, f'Usunięto: {flavor.name}')
+            # Silent for HTMX requests - visual state change is feedback enough
+            if not request.htmx:
+                messages.info(request, f'Usunięto: {flavor.name}')
         else:
             # Add to selection
             selection.flavors.add(flavor)
             selection.add_flavor_to_order(flavor_id)
-            messages.success(request, f'Dodano: {flavor.name}')
+            # Silent for HTMX requests - visual state change is feedback enough
+            if not request.htmx:
+                messages.success(request, f'Dodano: {flavor.name}')
 
         # Refresh selection state
         is_selected = not is_selected
 
     except Exception as e:
         logger.error(f"Error in toggle_flavor for flavor_id={flavor_id}: {e}")
+        # Errors always show, regardless of HTMX
         messages.error(request, 'Nie udało się zaktualizować wyboru. Spróbuj ponownie.')
 
     context = {
