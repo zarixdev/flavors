@@ -28,6 +28,8 @@ def admin_login(request):
     return render(request, 'admin/login.html')
 
 
+@login_required
+@require_http_methods(["POST"])
 def admin_logout(request):
     """Logout view."""
     logout(request)
