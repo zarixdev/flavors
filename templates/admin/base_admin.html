@@ -21,8 +21,8 @@
             <div class="flex items-center justify-between">
                 <a href="{% url 'flavors:admin_dashboard' %}" class="font-bold text-lg">Smaki Lodów</a>
                 <div class="flex gap-4">
-                    <a href="{% url 'flavors:admin_daily_selection' %}" class="text-sm text-gray-600">Dziś</a>
-                    <a href="{% url 'flavors:admin_flavor_list' %}" class="text-sm text-gray-600">Baza</a>
+                    <a href="{% url 'flavors:admin_daily_selection' %}" class="text-sm text-gray-600 px-2 py-2">Dziś</a>
+                    <a href="{% url 'flavors:admin_flavor_list' %}" class="text-sm text-gray-600 px-2 py-2">Baza</a>
                     <form method="post" action="{% url 'flavors:admin_logout' %}" class="inline">
                         {% csrf_token %}
                         <button type="submit" class="text-sm text-red-600 px-2 py-2 hover:underline">Wyloguj</button>
