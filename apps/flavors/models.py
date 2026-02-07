@@ -1,10 +1,10 @@
 import logging
 import uuid
 import os
-from datetime import datetime
 from io import BytesIO
 
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -25,7 +25,7 @@ PREDEFINED_TAGS = {
 def uuid_upload_to(instance, filename):
     """Generate UUID-based filename for collision-free storage."""
     ext = 'webp'  # Force WebP since we convert in save()
-    date_path = datetime.now().strftime('%Y/%m')
+    date_path = timezone.now().strftime('%Y/%m')
     return f'flavors/{date_path}/{uuid.uuid4().hex}.{ext}'
 
 
