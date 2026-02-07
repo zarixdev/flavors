@@ -1,5 +1,6 @@
 import logging
 
+from django.db import transaction
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
@@ -232,49 +233,47 @@ def toggle_flavor(request, flavor_id):
 
     flavor = get_object_or_404(Flavor, pk=flavor_id, status='active')
 
-    # Check if flavor is currently selected
-    is_selected = selection.flavors.filter(pk=flavor_id).exists()
-
     try:
-        if is_selected:
-            # Remove from selection
-            selection.flavors.remove(flavor)
-            selection.remove_flavor_from_order(flavor_id)
+        with transaction.atomic():
+            is_selected = selection.flavors.filter(pk=flavor_id).exists()
 
-            # If this was the hit, clear it
-            if selection.hit_of_the_day_id == flavor_id:
-                selection.hit_of_the_day = None
-                selection.save(update_fields=['hit_of_the_day'])
+            if is_selected:
+                selection.flavors.remove(flavor)
+                # Inline order removal to avoid extra save
+                if selection.display_order and flavor_id in selection.display_order:
+                    selection.display_order = [fid for fid in selection.display_order if fid != flavor_id]
 
-            # Silent for HTMX requests - visual state change is feedback enough
-            if not request.htmx:
-                messages.info(request, f'Usunięto: {flavor.name}')
-        else:
-            # Add to selection
-            selection.flavors.add(flavor)
-            selection.add_flavor_to_order(flavor_id)
-            # Silent for HTMX requests - visual state change is feedback enough
-            if not request.htmx:
-                messages.success(request, f'Dodano: {flavor.name}')
+                if selection.hit_of_the_day_id == flavor_id:
+                    selection.hit_of_the_day = None
 
-        # Update last_updated timestamp
-        selection.last_updated = timezone.now()
-        selection.save(update_fields=['last_updated'])
+                if not request.htmx:
+                    messages.info(request, f'Usunięto: {flavor.name}')
+            else:
+                selection.flavors.add(flavor)
+                # Inline order addition to avoid extra save
+                if selection.display_order is None:
+                    selection.display_order = []
+                if flavor_id not in selection.display_order:
+                    selection.display_order.append(flavor_id)
 
-        # Refresh selection state
-        is_selected = not is_selected
+                if not request.htmx:
+                    messages.success(request, f'Dodano: {flavor.name}')
+
+            selection.last_updated = timezone.now()
+            selection.save(update_fields=['display_order', 'hit_of_the_day', 'last_updated'])
+
+            is_selected = not is_selected
 
     except Exception as e:
         logger.error(f"Error in toggle_flavor for flavor_id={flavor_id}: {e}")
-        # Errors always show, regardless of HTMX
         messages.error(request, 'Nie udało się zaktualizować wyboru. Spróbuj ponownie.')
+        is_selected = selection.flavors.filter(pk=flavor_id).exists()
 
-    # Refresh selected_ids after toggle for counter context
     selected_ids = set(selection.flavors.values_list('id', flat=True))
 
     context = {
         'flavor': flavor,
-        'is_selected': is_selected if 'is_selected' in locals() else False,
+        'is_selected': is_selected,
         'selection': selection,
         'selected_count': len(selected_ids),
         'total_count': Flavor.objects.filter(status='active').count(),
