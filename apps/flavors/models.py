@@ -120,8 +120,8 @@ class DailySelection(models.Model):
         related_name='hit_days'
     )
     display_order = models.JSONField(default=list, blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    last_updated = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)  # Auto-set on every save (internal)
+    last_updated = models.DateTimeField(null=True, blank=True)  # Manually set when selection content changes (shown to users)
 
     def __str__(self):
         return f"Dzisiejsze smaki: {self.date}"
