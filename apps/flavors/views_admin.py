@@ -305,26 +305,19 @@ def set_hit(request, flavor_id):
         return _get_selection_partial(request, selection)
 
     try:
-        # Toggle hit state
         if selection.hit_of_the_day_id == flavor_id:
             selection.hit_of_the_day = None
-            selection.save(update_fields=['hit_of_the_day'])
-            # Silent for HTMX requests - visual state change is feedback enough
             if not request.htmx:
                 messages.info(request, f'Usunięto hit dnia: {flavor.name}')
         else:
             selection.hit_of_the_day = flavor
-            selection.save(update_fields=['hit_of_the_day'])
-            # Silent for HTMX requests - visual state change is feedback enough
             if not request.htmx:
                 messages.success(request, f'Hit dnia: {flavor.name}')
 
-        # Update last_updated timestamp
         selection.last_updated = timezone.now()
-        selection.save(update_fields=['last_updated'])
+        selection.save(update_fields=['hit_of_the_day', 'last_updated'])
     except Exception as e:
         logger.error(f"Error in set_hit for flavor_id={flavor_id}: {e}")
-        # Errors always show, regardless of HTMX
         messages.error(request, 'Nie udało się ustawić hitu dnia. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection)
