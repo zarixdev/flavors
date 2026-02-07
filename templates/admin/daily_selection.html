@@ -9,8 +9,8 @@
     <h1 class="text-2xl font-bold text-gray-800 mb-2">Dzisiejsze Smaki</h1>
     <p class="text-sm text-gray-500">
         {{ today|date:"l, j E Y" }}
-        {% if selection.updated_at != selection.created_at %}
-            <span class="text-gray-400">| Zaktualizowano {{ selection.updated_at|naturaltime }}</span>
+        {% if selection.last_updated %}
+            <span class="text-gray-400">| Zaktualizowano {{ selection.last_updated|naturaltime }}</span>
         {% endif %}
     </p>
 </div>
