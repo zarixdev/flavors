@@ -41,7 +41,7 @@ class Flavor(models.Model):
     ]
 
     name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(unique=True, blank=True)
+    slug = models.SlugField(unique=True, blank=True, allow_unicode=True)
     description = models.TextField(blank=True)
     flavor_type = models.CharField(max_length=20, choices=FLAVOR_TYPES, default='milk')
     tags = models.JSONField(default=list, blank=True)
@@ -52,7 +52,13 @@ class Flavor(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name, allow_unicode=True)
+            slug = base_slug
+            counter = 2
+            while Flavor.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
 
         # Process image only if it's new or changed
         if self.photo and hasattr(self.photo, 'file'):
