@@ -206,6 +206,7 @@ def daily_selection(request):
         'selection': selection,
         'flavors': flavors_with_state,
         'selected_flavors': selected_flavors,
+        'all_flavors': all_flavors,
         'today': today,
         'selected_count': len(selected_ids),
     }
