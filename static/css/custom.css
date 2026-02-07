@@ -1,6 +1,31 @@
 /* static/css/custom.css */
 
 /* ============================================
+   Ice Cream Shop Theme Colors
+   ============================================ */
+
+:root {
+    /* Selection states */
+    --flavor-selected-bg: #f0fdf4;        /* green-50 */
+    --flavor-selected-border: #bbf7d0;    /* green-200 */
+    --flavor-selected-text: #15803d;      /* green-700 */
+
+    /* Hit states */
+    --flavor-hit-active-bg: #fef3c7;      /* amber-100 */
+    --flavor-hit-active-border: #fcd34d;  /* amber-300 */
+    --flavor-hit-active-text: #b45309;    /* amber-700 */
+    --flavor-hit-icon: #fbbf24;           /* amber-400 */
+
+    /* Unselected states */
+    --flavor-unselected-bg: #ffffff;
+    --flavor-unselected-border: #e5e7eb;  /* gray-200 */
+    --flavor-unselected-text: #374151;    /* gray-700 */
+
+    /* Transitions */
+    --state-transition: all 0.2s ease-in-out;
+}
+
+/* ============================================
    Toast Animation
    ============================================ */
 @keyframes fadeOut {
@@ -99,4 +124,125 @@ button.htmx-request,
 
 .htmx-request.hx-pulse {
     animation: hx-pulse 1s ease-in-out infinite;
+}
+
+/* ============================================
+   Flavor Row State Classes
+   ============================================ */
+
+.flavor-row {
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+/* Unselected state - neutral, clean */
+.flavor-row--unselected {
+    background-color: var(--flavor-unselected-bg);
+    border-color: var(--flavor-unselected-border);
+}
+
+.flavor-row--unselected .flavor-name {
+    color: var(--flavor-unselected-text);
+}
+
+/* Selected state - subtle green */
+.flavor-row--selected {
+    background-color: var(--flavor-selected-bg);
+    border-color: var(--flavor-selected-border);
+}
+
+.flavor-row--selected .flavor-name {
+    color: var(--flavor-selected-text);
+}
+
+/* HTMX loading states for rows */
+.flavor-row.htmx-request {
+    opacity: 0.7;
+}
+
+.flavor-row--selected.htmx-request {
+    background-color: #dcfce7; /* slightly darker green during request */
+}
+
+/* ============================================
+   Hit Button Transitions (Plan 07-01)
+   ============================================ */
+
+/* Hit button state transitions */
+.hit-btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.hit-btn:hover {
+    transform: scale(1.02);
+}
+
+.hit-btn:active {
+    transform: scale(0.98);
+}
+
+/* HTMX loading state for hit button */
+.hit-btn.htmx-request {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+/* ============================================
+   Sortable Drag & Drop Styles
+   ============================================ */
+
+/* Sortable container */
+#sortable-flavors {
+    touch-action: pan-y;
+}
+
+/* Sortable item */
+.sortable-item {
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+/* Ghost (placeholder during drag) */
+.sortable-item.sortable-ghost {
+    opacity: 0.4;
+    background-color: #f3f4f6;
+    border: 2px dashed #d1d5db;
+}
+
+/* Dragging item */
+.sortable-item.sortable-drag {
+    opacity: 0.9;
+    background-color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: scale(1.02);
+    z-index: 10;
+}
+
+/* Drag handle */
+.drag-handle {
+    cursor: grab;
+    transition: color 0.15s ease;
+}
+
+.drag-handle:hover {
+    color: #6b7280;
+}
+
+.sortable-item:active .drag-handle {
+    cursor: grabbing;
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+    .sortable-item {
+        min-height: 64px;
+    }
+    .drag-handle {
+        padding: 8px;
+        margin: -8px;
+    }
+}
+
+/* HTMX loading during sort save */
+#sortable-flavors.htmx-request {
+    opacity: 0.7;
+    pointer-events: none;
 }

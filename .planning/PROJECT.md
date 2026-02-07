@@ -70,7 +70,17 @@ Daily updates are fast enough (30-60 seconds) that the owner actually uses the s
 - ✅ Changes visible immediately on public frontend
 - ✅ Update operation takes 30-60 seconds max
 
-### Active (v1.1+ Candidates)
+### Active (v1.1 Polish)
+
+- [ ] Przycisk "hit dnia" w panelu wyboru smaków
+- [ ] Lepsza wizualizacja tagów (ramka dla wybranych)
+- [ ] Live update czasu ostatniej zmiany
+- [ ] Usunięcie zbędnych komunikatów (toast)
+- [ ] Zielone podświetlenie wybranych smaków
+- [ ] Ładniejsze nazwy smaków w panelu (bez */+)
+- [ ] Naprawa licznika wybranych smaków (live update)
+
+### Future (v1.2+)
 
 - [ ] Image CDN integration (Cloudflare, S3)
 - [ ] Database query caching
@@ -132,4 +142,19 @@ Daily updates are fast enough (30-60 seconds) that the owner actually uses the s
 
 ---
 
-*Last updated: 2026-02-01 after v1.0 MVP completion*
+## Current Milestone: v1.1 Polish
+
+**Goal:** Poprawki UX/UI panelu administracyjnego po feedbackzie właściciela - lepsza obsługa hitu dnia, czytelniejsze tagi, live updates, uproszczone komunikaty.
+
+**Target features:**
+- Przycisk "hit dnia" w panelu wyboru smaków
+- Lepsza wizualizacja tagów (ramka dla wybranych)
+- Live update czasu ostatniej zmiany
+- Usunięcie zbędnych komunikatów (toast)
+- Zielone podświetlenie wybranych smaków
+- Ładniejsze nazwy smaków w panelu (bez */+)
+- Naprawa licznika wybranych smaków (live update)
+
+---
+
+*Last updated: 2026-02-05 after starting v1.1 Polish milestone*

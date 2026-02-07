@@ -1,0 +1,9 @@
+<!-- templates/admin/partials/live_timestamp.html -->
+<!-- Live timestamp showing last selection update time - OOB swappable -->
+{% if show_timestamp and timestamp %}
+<div id="live-timestamp" hx-swap-oob="true" class="text-xs text-gray-400 mb-2">
+  Ostatnia aktualizacja: {{ timestamp|time:"H:i" }}
+</div>
+{% else %}
+<div id="live-timestamp" hx-swap-oob="true" class="hidden"></div>
+{% endif %}

@@ -1,0 +1,9 @@
+{% load flavor_tags %}
+<!-- templates/admin/partials/live_counter.html -->
+<!-- OOB-swappable counter component for live updates -->
+<div id="live-counter" hx-swap-oob="true" class="text-sm text-gray-500 mb-4">
+    Wybrano: {{ selected_count }} z {{ total_count }} smaków
+    {% if hit_name %}
+        | Hit: {{ hit_name|clean_flavor_name }}
+    {% endif %}
+</div>

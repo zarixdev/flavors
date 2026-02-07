@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 import json
-from .models import Flavor
+from .models import Flavor, PREDEFINED_TAGS
 
 
 class FlavorForm(forms.ModelForm):
@@ -23,5 +23,9 @@ class FlavorForm(forms.ModelForm):
 
         if len(tags) > 5:
             raise ValidationError('Możesz wybrać maksymalnie 5 tagów')
+
+        invalid = [t for t in tags if t not in PREDEFINED_TAGS]
+        if invalid:
+            raise ValidationError(f'Nieprawidłowe tagi: {", ".join(invalid)}')
 
         return tags

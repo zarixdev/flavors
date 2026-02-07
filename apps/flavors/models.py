@@ -1,10 +1,10 @@
 import logging
 import uuid
 import os
-from datetime import datetime
 from io import BytesIO
 
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -25,7 +25,7 @@ PREDEFINED_TAGS = {
 def uuid_upload_to(instance, filename):
     """Generate UUID-based filename for collision-free storage."""
     ext = 'webp'  # Force WebP since we convert in save()
-    date_path = datetime.now().strftime('%Y/%m')
+    date_path = timezone.now().strftime('%Y/%m')
     return f'flavors/{date_path}/{uuid.uuid4().hex}.{ext}'
 
 
@@ -41,7 +41,7 @@ class Flavor(models.Model):
     ]
 
     name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(unique=True, blank=True)
+    slug = models.SlugField(unique=True, blank=True, allow_unicode=True)
     description = models.TextField(blank=True)
     flavor_type = models.CharField(max_length=20, choices=FLAVOR_TYPES, default='milk')
     tags = models.JSONField(default=list, blank=True)
@@ -52,7 +52,13 @@ class Flavor(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name, allow_unicode=True)
+            slug = base_slug
+            counter = 2
+            while Flavor.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
 
         # Process image only if it's new or changed
         if self.photo and hasattr(self.photo, 'file'):
@@ -75,9 +81,8 @@ class Flavor(models.Model):
                 try:
                     img = Image.open(self.photo)
 
-                    # Convert RGBA/P to RGB for WebP compatibility
-                    if img.mode in ('RGBA', 'P'):
-                        img = img.convert('RGB')
+                    if img.mode == 'P':
+                        img = img.convert('RGBA')
 
                     # Resize to max 1200px maintaining aspect ratio
                     max_size = (1200, 1200)
@@ -115,7 +120,8 @@ class DailySelection(models.Model):
         related_name='hit_days'
     )
     display_order = models.JSONField(default=list, blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)  # Auto-set on every save (internal)
+    last_updated = models.DateTimeField(null=True, blank=True)  # Manually set when selection content changes (shown to users)
 
     def __str__(self):
         return f"Dzisiejsze smaki: {self.date}"

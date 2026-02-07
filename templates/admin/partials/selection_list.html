@@ -1,3 +1,4 @@
+{% load flavor_tags %}
 <!-- templates/admin/partials/selection_list.html -->
 {% include "admin/partials/toast.html" %}
 
@@ -16,15 +17,18 @@
             Kopiuj z wczoraj
         </button>
     {% else %}
-        <!-- Has flavors: Show sort button (URL created in Task 5) and clear -->
+        <!-- Has flavors: Show sort button and clear -->
         <button
             hx-get="{% url 'flavors:admin_daily_selection_sort' %}"
             hx-target="#selection-container"
             hx-indicator="this"
             hx-disabled-elt="this"
-            class="flex-1 bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg font-medium min-h-[48px] hover:bg-gray-50 transition-colors"
+            class="flex-1 bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg font-medium min-h-[48px] hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
         >
-            Sortuj
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            Zmień kolejność
         </button>
         <button
             hx-post="{% url 'flavors:admin_clear_selection' %}"
@@ -39,24 +43,24 @@
     {% endif %}
 </div>
 
+<!-- Timestamp -->
+{% include "admin/partials/live_timestamp.html" with timestamp=selection.last_updated show_timestamp=selection.flavors.exists %}
+
 <!-- Selection Info -->
-<div class="text-sm text-gray-500 mb-4">
-    Wybrano: {{ selection.flavors.count }} z {{ all_flavors|length }} smaków
-    {% if selection.hit_of_the_day %}
-        | Hit: {{ selection.hit_of_the_day.name }}
-    {% endif %}
-</div>
+{% include "admin/partials/live_counter.html" with selected_count=selection.flavors.count total_count=all_flavors|length hit_name=selection.hit_of_the_day.name %}
 
 <!-- Flavor List -->
-<div class="border rounded-lg overflow-hidden">
+<div id="selection-container" class="border rounded-lg overflow-hidden bg-white shadow-sm" hx-sync="this:replace">
     {% for item in flavors %}
         {% with flavor=item.flavor is_selected=item.is_selected %}
         {% include "admin/partials/flavor_select_row.html" %}
         {% endwith %}
     {% empty %}
         <div class="p-8 text-center text-gray-500">
-            Brak aktywnych smaków w bazie.
-            <a href="{% url 'flavors:admin_flavor_create' %}" class="text-blue-600 hover:underline">Dodaj pierwszy smak</a>
+            <p class="mb-2">Brak aktywnych smaków w bazie.</p>
+            <a href="{% url 'flavors:admin_flavor_create' %}" class="text-green-600 hover:text-green-700 font-medium hover:underline transition-colors">
+                Dodaj pierwszy smak
+            </a>
         </div>
     {% endfor %}
 </div>

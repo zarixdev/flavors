@@ -1,7 +1,9 @@
 import logging
 
+from django.conf import settings
+from django.db import transaction
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
@@ -16,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 def admin_login(request):
     """Custom login view for ice cream shop owner."""
+    if request.user.is_authenticated:
+        return redirect('flavors:admin_dashboard')
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -28,13 +32,15 @@ def admin_login(request):
     return render(request, 'admin/login.html')
 
 
+@staff_member_required
+@require_http_methods(["POST"])
 def admin_logout(request):
     """Logout view."""
     logout(request)
     return redirect('flavors:admin_login')
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def admin_dashboard(request):
     """Main admin dashboard - list flavors and daily selection status."""
@@ -54,7 +60,7 @@ def admin_dashboard(request):
     return render(request, 'admin/dashboard.html', context)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def flavor_list(request):
     """List all flavors with filter by status."""
@@ -78,7 +84,7 @@ def flavor_list(request):
     })
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET", "POST"])
 def flavor_create(request):
     """Create new flavor with HTMX support."""
@@ -104,7 +110,7 @@ def flavor_create(request):
     })
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET", "POST"])
 def flavor_edit(request, pk):
     """Edit existing flavor."""
@@ -124,7 +130,7 @@ def flavor_edit(request, pk):
     })
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def flavor_detail(request, pk):
     """View flavor details (read-only)."""
@@ -132,7 +138,7 @@ def flavor_detail(request, pk):
     return render(request, 'admin/flavor_detail.html', {'flavor': flavor})
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def archive_flavor(request, pk):
     """Archive a flavor (soft delete)."""
@@ -144,7 +150,7 @@ def archive_flavor(request, pk):
     return redirect('flavors:admin_flavor_list')
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def restore_flavor(request, pk):
     """Restore an archived flavor to active status."""
@@ -155,7 +161,7 @@ def restore_flavor(request, pk):
     return redirect('flavors:admin_archived_flavors')
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def archived_flavors(request):
     """List all archived flavors with restore option."""
@@ -167,7 +173,7 @@ def archived_flavors(request):
 # DAILY SELECTION VIEWS
 # ============================================================================
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def daily_selection(request):
     """
@@ -202,6 +208,7 @@ def daily_selection(request):
         'selection': selection,
         'flavors': flavors_with_state,
         'selected_flavors': selected_flavors,
+        'all_flavors': all_flavors,
         'today': today,
         'selected_count': len(selected_ids),
     }
@@ -212,7 +219,7 @@ def daily_selection(request):
     return render(request, 'admin/daily_selection.html', context)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def toggle_flavor(request, flavor_id):
     """
@@ -227,44 +234,59 @@ def toggle_flavor(request, flavor_id):
 
     flavor = get_object_or_404(Flavor, pk=flavor_id, status='active')
 
-    # Check if flavor is currently selected
-    is_selected = selection.flavors.filter(pk=flavor_id).exists()
-
     try:
-        if is_selected:
-            # Remove from selection
-            selection.flavors.remove(flavor)
-            selection.remove_flavor_from_order(flavor_id)
+        with transaction.atomic():
+            is_selected = selection.flavors.filter(pk=flavor_id).exists()
 
-            # If this was the hit, clear it
-            if selection.hit_of_the_day_id == flavor_id:
-                selection.hit_of_the_day = None
-                selection.save(update_fields=['hit_of_the_day'])
+            if is_selected:
+                selection.flavors.remove(flavor)
+                # Inline order removal to avoid extra save
+                if selection.display_order and flavor_id in selection.display_order:
+                    selection.display_order = [fid for fid in selection.display_order if fid != flavor_id]
 
-            messages.info(request, f'Usunięto: {flavor.name}')
-        else:
-            # Add to selection
-            selection.flavors.add(flavor)
-            selection.add_flavor_to_order(flavor_id)
-            messages.success(request, f'Dodano: {flavor.name}')
+                if selection.hit_of_the_day_id == flavor_id:
+                    selection.hit_of_the_day = None
 
-        # Refresh selection state
-        is_selected = not is_selected
+                if not request.htmx:
+                    messages.info(request, f'Usunięto: {flavor.name}')
+            else:
+                selection.flavors.add(flavor)
+                # Inline order addition to avoid extra save
+                if selection.display_order is None:
+                    selection.display_order = []
+                if flavor_id not in selection.display_order:
+                    selection.display_order.append(flavor_id)
+
+                if not request.htmx:
+                    messages.success(request, f'Dodano: {flavor.name}')
+
+            selection.last_updated = timezone.now()
+            selection.save(update_fields=['display_order', 'hit_of_the_day', 'last_updated'])
+
+            is_selected = not is_selected
 
     except Exception as e:
         logger.error(f"Error in toggle_flavor for flavor_id={flavor_id}: {e}")
+        if settings.DEBUG:
+            raise
         messages.error(request, 'Nie udało się zaktualizować wyboru. Spróbuj ponownie.')
+        is_selected = selection.flavors.filter(pk=flavor_id).exists()
+
+    selected_ids = set(selection.flavors.values_list('id', flat=True))
 
     context = {
         'flavor': flavor,
-        'is_selected': is_selected if 'is_selected' in locals() else False,
+        'is_selected': is_selected,
         'selection': selection,
+        'selected_count': len(selected_ids),
+        'total_count': Flavor.objects.filter(status='active').count(),
+        'hit_name': selection.hit_of_the_day.name if selection.hit_of_the_day else None,
     }
 
-    return render(request, 'admin/partials/flavor_select_row.html', context)
+    return render(request, 'admin/partials/toggle_response.html', context)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def set_hit(request, flavor_id):
     """
@@ -286,23 +308,27 @@ def set_hit(request, flavor_id):
         return _get_selection_partial(request, selection)
 
     try:
-        # Toggle hit state
         if selection.hit_of_the_day_id == flavor_id:
             selection.hit_of_the_day = None
-            selection.save(update_fields=['hit_of_the_day'])
-            messages.info(request, f'Usunięto hit dnia: {flavor.name}')
+            if not request.htmx:
+                messages.info(request, f'Usunięto hit dnia: {flavor.name}')
         else:
             selection.hit_of_the_day = flavor
-            selection.save(update_fields=['hit_of_the_day'])
-            messages.success(request, f'Hit dnia: {flavor.name}')
+            if not request.htmx:
+                messages.success(request, f'Hit dnia: {flavor.name}')
+
+        selection.last_updated = timezone.now()
+        selection.save(update_fields=['hit_of_the_day', 'last_updated'])
     except Exception as e:
         logger.error(f"Error in set_hit for flavor_id={flavor_id}: {e}")
+        if settings.DEBUG:
+            raise
         messages.error(request, 'Nie udało się ustawić hitu dnia. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def move_flavor(request, flavor_id, direction):
     """
@@ -335,12 +361,14 @@ def move_flavor(request, flavor_id, direction):
             messages.info(request, 'Nie można przesunąć dalej.')
     except Exception as e:
         logger.error(f"Error in move_flavor for flavor_id={flavor_id}, direction={direction}: {e}")
+        if settings.DEBUG:
+            raise
         messages.error(request, 'Nie udało się zmienić kolejności. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection, sort_mode=True)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def copy_from_yesterday(request):
     """
@@ -370,8 +398,6 @@ def copy_from_yesterday(request):
         return _get_selection_partial(request, selection)
 
     try:
-        # Clear current selection
-        selection.flavors.clear()
         selection.hit_of_the_day = None
 
         # Copy flavors
@@ -387,17 +413,20 @@ def copy_from_yesterday(request):
                 new_order.append(flavor.id)
 
         selection.display_order = new_order
-        selection.save(update_fields=['display_order', 'hit_of_the_day'])
+        selection.last_updated = timezone.now()
+        selection.save(update_fields=['display_order', 'hit_of_the_day', 'last_updated'])
 
         messages.success(request, f'Skopiowano {flavor_count} smaków z wczoraj.')
     except Exception as e:
         logger.error(f"Error in copy_from_yesterday: {e}")
+        if settings.DEBUG:
+            raise
         messages.error(request, 'Nie udało się skopiować wczorajszego wyboru. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def clear_selection(request):
     """
@@ -415,16 +444,21 @@ def clear_selection(request):
         selection.flavors.clear()
         selection.hit_of_the_day = None
         selection.display_order = []
-        selection.save(update_fields=['hit_of_the_day', 'display_order'])
-        messages.info(request, f'Wyczyszczono wybór ({count} smaków).')
+        selection.last_updated = timezone.now()
+        selection.save(update_fields=['hit_of_the_day', 'display_order', 'last_updated'])
+        # Silent for HTMX requests - visual state change is feedback enough
+        if not request.htmx:
+            messages.info(request, f'Wyczyszczono wybór ({count} smaków).')
     except Exception as e:
         logger.error(f"Error in clear_selection: {e}")
+        if settings.DEBUG:
+            raise
         messages.error(request, 'Nie udało się wyczyścić wyboru. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def daily_selection_sort(request):
     """Sort mode for reordering selected flavors."""
@@ -440,6 +474,55 @@ def daily_selection_sort(request):
         'selection': selection,
         'selected_flavors': selected_flavors,
     })
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def reorder_flavors(request):
+    """
+    Reorder selected flavors based on sortable POST data.
+    Expects form data with 'flavor_order' containing ordered flavor IDs.
+    """
+    today = timezone.now().date()
+    selection, _ = DailySelection.objects.get_or_create(
+        date=today,
+        defaults={'display_order': []}
+    )
+
+    # Get ordered IDs from form data (htmx-sort sends: flavor_order=1&flavor_order=3...)
+    ordered_ids = request.POST.getlist('flavor_order')
+
+    if not ordered_ids:
+        messages.error(request, 'Nie przesłano nowej kolejności.')
+        return _get_selection_partial(request, selection, sort_mode=True)
+
+    try:
+        # Convert to integers
+        ordered_ids = [int(fid) for fid in ordered_ids]
+
+        # Validate all selected flavors are present
+        selected_ids = set(selection.flavors.values_list('id', flat=True))
+        received_ids = set(ordered_ids)
+
+        if received_ids != selected_ids:
+            messages.error(request, 'Nieprawidłowa kolejność - brakujące lub dodatkowe smaki.')
+            return _get_selection_partial(request, selection, sort_mode=True)
+
+        # Save new order
+        selection.display_order = ordered_ids
+        selection.save(update_fields=['display_order'])
+        messages.success(request, 'Kolejność została zaktualizowana.')
+
+    except (ValueError, TypeError) as e:
+        logger.error(f"Error parsing flavor order: {e}")
+        messages.error(request, 'Nieprawidłowy format danych.')
+    except Exception as e:
+        logger.error(f"Error in reorder_flavors: {e}")
+        if settings.DEBUG:
+            raise
+        messages.error(request, 'Nie udało się zmienić kolejności. Spróbuj ponownie.')
+
+    return _get_selection_partial(request, selection, sort_mode=True)
 
 
 def _get_selection_partial(request, selection, sort_mode=False):

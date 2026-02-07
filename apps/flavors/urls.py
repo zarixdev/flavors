@@ -20,6 +20,7 @@ urlpatterns = [
     path('panel/dzis/copy-yesterday/', views_admin.copy_from_yesterday, name='admin_copy_yesterday'),
     path('panel/dzis/clear/', views_admin.clear_selection, name='admin_clear_selection'),
     path('panel/dzis/sort/', views_admin.daily_selection_sort, name='admin_daily_selection_sort'),
+    path('panel/dzis/reorder/', views_admin.reorder_flavors, name='admin_reorder_flavors'),
 
     # Flavor CRUD
     path('panel/flavors/', views_admin.flavor_list, name='admin_flavor_list'),

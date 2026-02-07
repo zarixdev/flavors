@@ -9,17 +9,24 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <!-- SortableJS for drag & drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" defer></script>
+    <!-- htmx-sort plugin for HTMX integration -->
+    <script src="https://cdn.jsdelivr.net/npm/htmx-ext-sortable@2.0.0/sortable.min.js" defer></script>
 </head>
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="bg-gray-50 min-h-screen">
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' data-login-url="{% url 'flavors:admin_login' %}" class="bg-gray-50 min-h-screen">
     {% if user.is_authenticated %}
     <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
         <div class="max-w-lg mx-auto px-4 py-3">
             <div class="flex items-center justify-between">
                 <a href="{% url 'flavors:admin_dashboard' %}" class="font-bold text-lg">Smaki Lodów</a>
                 <div class="flex gap-4">
-                    <a href="{% url 'flavors:admin_daily_selection' %}" class="text-sm text-gray-600">Dziś</a>
-                    <a href="{% url 'flavors:admin_flavor_list' %}" class="text-sm text-gray-600">Baza</a>
-                    <a href="{% url 'flavors:admin_logout' %}" class="text-sm text-red-600">Wyloguj</a>
+                    <a href="{% url 'flavors:admin_daily_selection' %}" class="text-sm text-gray-600 px-2 py-2">Dziś</a>
+                    <a href="{% url 'flavors:admin_flavor_list' %}" class="text-sm text-gray-600 px-2 py-2">Baza</a>
+                    <form method="post" action="{% url 'flavors:admin_logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-sm text-red-600 px-2 py-2 hover:underline">Wyloguj</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -115,7 +122,7 @@
 
                 // Redirect to login after a delay
                 setTimeout(() => {
-                    window.location.href = '/panel/login/';
+                    window.location.href = document.body.dataset.loginUrl;
                 }, 3000);
             }
         });
