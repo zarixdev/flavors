@@ -6,12 +6,12 @@
     <form method="post" class="space-y-4">
         {% csrf_token %}
         <div>
-            <label class="block text-sm font-medium text-gray-700">Użytkownik</label>
-            <input type="text" name="username" class="w-full px-4 py-3 rounded-lg border border-gray-300" required>
+            <label for="id_username" class="block text-sm font-medium text-gray-700">Użytkownik</label>
+            <input type="text" name="username" id="id_username" class="w-full px-4 py-3 rounded-lg border border-gray-300" required>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">Hasło</label>
-            <input type="password" name="password" class="w-full px-4 py-3 rounded-lg border border-gray-300" required>
+            <label for="id_password" class="block text-sm font-medium text-gray-700">Hasło</label>
+            <input type="password" name="password" id="id_password" class="w-full px-4 py-3 rounded-lg border border-gray-300" required>
         </div>
         <button type="submit" class="w-full bg-blue-600 text-white font-medium py-3 rounded-lg">Zaloguj</button>
     </form>
