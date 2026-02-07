@@ -1,7 +1,7 @@
 import logging
 
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
@@ -28,7 +28,7 @@ def admin_login(request):
     return render(request, 'admin/login.html')
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def admin_logout(request):
     """Logout view."""
@@ -36,7 +36,7 @@ def admin_logout(request):
     return redirect('flavors:admin_login')
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def admin_dashboard(request):
     """Main admin dashboard - list flavors and daily selection status."""
@@ -56,7 +56,7 @@ def admin_dashboard(request):
     return render(request, 'admin/dashboard.html', context)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def flavor_list(request):
     """List all flavors with filter by status."""
@@ -80,7 +80,7 @@ def flavor_list(request):
     })
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET", "POST"])
 def flavor_create(request):
     """Create new flavor with HTMX support."""
@@ -106,7 +106,7 @@ def flavor_create(request):
     })
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET", "POST"])
 def flavor_edit(request, pk):
     """Edit existing flavor."""
@@ -126,7 +126,7 @@ def flavor_edit(request, pk):
     })
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def flavor_detail(request, pk):
     """View flavor details (read-only)."""
@@ -134,7 +134,7 @@ def flavor_detail(request, pk):
     return render(request, 'admin/flavor_detail.html', {'flavor': flavor})
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def archive_flavor(request, pk):
     """Archive a flavor (soft delete)."""
@@ -146,7 +146,7 @@ def archive_flavor(request, pk):
     return redirect('flavors:admin_flavor_list')
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def restore_flavor(request, pk):
     """Restore an archived flavor to active status."""
@@ -157,7 +157,7 @@ def restore_flavor(request, pk):
     return redirect('flavors:admin_archived_flavors')
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def archived_flavors(request):
     """List all archived flavors with restore option."""
@@ -169,7 +169,7 @@ def archived_flavors(request):
 # DAILY SELECTION VIEWS
 # ============================================================================
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def daily_selection(request):
     """
@@ -214,7 +214,7 @@ def daily_selection(request):
     return render(request, 'admin/daily_selection.html', context)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def toggle_flavor(request, flavor_id):
     """
@@ -281,7 +281,7 @@ def toggle_flavor(request, flavor_id):
     return render(request, 'admin/partials/toggle_response.html', context)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def set_hit(request, flavor_id):
     """
@@ -328,7 +328,7 @@ def set_hit(request, flavor_id):
     return _get_selection_partial(request, selection)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def move_flavor(request, flavor_id, direction):
     """
@@ -366,7 +366,7 @@ def move_flavor(request, flavor_id, direction):
     return _get_selection_partial(request, selection, sort_mode=True)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def copy_from_yesterday(request):
     """
@@ -424,7 +424,7 @@ def copy_from_yesterday(request):
     return _get_selection_partial(request, selection)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def clear_selection(request):
     """
@@ -455,7 +455,7 @@ def clear_selection(request):
     return _get_selection_partial(request, selection)
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["GET"])
 def daily_selection_sort(request):
     """Sort mode for reordering selected flavors."""
@@ -473,7 +473,7 @@ def daily_selection_sort(request):
     })
 
 
-@login_required
+@staff_member_required
 @require_http_methods(["POST"])
 def reorder_flavors(request):
     """
