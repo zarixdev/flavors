@@ -28,7 +28,7 @@
                 hx-target="#selection-container"
                 hx-swap="innerHTML"
                 hx-sync="closest #selection-container:replace"
-                hx-stop
+                onclick="event.stopPropagation()"
                 hx-indicator="this"
                 hx-disabled-elt="this"
                 aria-label="Usuń hit dnia"
@@ -48,7 +48,7 @@
                 hx-target="#selection-container"
                 hx-swap="innerHTML"
                 hx-sync="closest #selection-container:replace"
-                hx-stop
+                onclick="event.stopPropagation()"
                 hx-indicator="this"
                 hx-disabled-elt="this"
                 aria-label="Ustaw hit dnia"
