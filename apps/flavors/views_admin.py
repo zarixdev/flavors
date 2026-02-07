@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.db import transaction
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.admin.views.decorators import staff_member_required
@@ -266,6 +267,8 @@ def toggle_flavor(request, flavor_id):
 
     except Exception as e:
         logger.error(f"Error in toggle_flavor for flavor_id={flavor_id}: {e}")
+        if settings.DEBUG:
+            raise
         messages.error(request, 'Nie udało się zaktualizować wyboru. Spróbuj ponownie.')
         is_selected = selection.flavors.filter(pk=flavor_id).exists()
 
@@ -318,6 +321,8 @@ def set_hit(request, flavor_id):
         selection.save(update_fields=['hit_of_the_day', 'last_updated'])
     except Exception as e:
         logger.error(f"Error in set_hit for flavor_id={flavor_id}: {e}")
+        if settings.DEBUG:
+            raise
         messages.error(request, 'Nie udało się ustawić hitu dnia. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection)
@@ -356,6 +361,8 @@ def move_flavor(request, flavor_id, direction):
             messages.info(request, 'Nie można przesunąć dalej.')
     except Exception as e:
         logger.error(f"Error in move_flavor for flavor_id={flavor_id}, direction={direction}: {e}")
+        if settings.DEBUG:
+            raise
         messages.error(request, 'Nie udało się zmienić kolejności. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection, sort_mode=True)
@@ -412,6 +419,8 @@ def copy_from_yesterday(request):
         messages.success(request, f'Skopiowano {flavor_count} smaków z wczoraj.')
     except Exception as e:
         logger.error(f"Error in copy_from_yesterday: {e}")
+        if settings.DEBUG:
+            raise
         messages.error(request, 'Nie udało się skopiować wczorajszego wyboru. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection)
@@ -442,7 +451,8 @@ def clear_selection(request):
             messages.info(request, f'Wyczyszczono wybór ({count} smaków).')
     except Exception as e:
         logger.error(f"Error in clear_selection: {e}")
-        # Errors always show, regardless of HTMX
+        if settings.DEBUG:
+            raise
         messages.error(request, 'Nie udało się wyczyścić wyboru. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection)
@@ -508,6 +518,8 @@ def reorder_flavors(request):
         messages.error(request, 'Nieprawidłowy format danych.')
     except Exception as e:
         logger.error(f"Error in reorder_flavors: {e}")
+        if settings.DEBUG:
+            raise
         messages.error(request, 'Nie udało się zmienić kolejności. Spróbuj ponownie.')
 
     return _get_selection_partial(request, selection, sort_mode=True)
