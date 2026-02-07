@@ -81,9 +81,8 @@ class Flavor(models.Model):
                 try:
                     img = Image.open(self.photo)
 
-                    # Convert RGBA/P to RGB for WebP compatibility
-                    if img.mode in ('RGBA', 'P'):
-                        img = img.convert('RGB')
+                    if img.mode == 'P':
+                        img = img.convert('RGBA')
 
                     # Resize to max 1200px maintaining aspect ratio
                     max_size = (1200, 1200)
