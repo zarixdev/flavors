@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 def admin_login(request):
     """Custom login view for ice cream shop owner."""
+    if request.user.is_authenticated:
+        return redirect('flavors:admin_dashboard')
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
