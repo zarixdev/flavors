@@ -391,8 +391,6 @@ def copy_from_yesterday(request):
         return _get_selection_partial(request, selection)
 
     try:
-        # Clear current selection
-        selection.flavors.clear()
         selection.hit_of_the_day = None
 
         # Copy flavors
